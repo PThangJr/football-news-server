@@ -10,12 +10,13 @@ var route = require('./routes');
 
 var footballNewsDB = require('./config/footballNewsDB');
 
-var pagination = require('./app/middleware/pagination'); // console.log(process.env.PORT);
+var cookieParser = require('cookie-parser'); // console.log(process.env.PORT);
 
 
 var app = express();
 footballNewsDB.connect();
 var PORT = process.env.PORT || 8080;
+app.use(cookieParser());
 app.use(express.urlencoded({
   extended: true
 }));

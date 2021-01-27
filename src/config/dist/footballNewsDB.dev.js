@@ -15,7 +15,8 @@ var connect = function connect() {
           _context.next = 3;
           return regeneratorRuntime.awrap(mongoose.connect(process.env.MONGGO_SERVER, {
             useNewUrlParser: true,
-            useUnifiedTopology: true
+            useUnifiedTopology: true,
+            useCreateIndex: true
           }));
 
         case 3:

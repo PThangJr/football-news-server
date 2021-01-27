@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const route = require('./routes');
 const footballNewsDB = require('./config/footballNewsDB');
-const pagination = require('./app/middleware/pagination');
+const cookieParser = require('cookie-parser');
 
 // console.log(process.env.PORT);
 
@@ -12,6 +12,7 @@ const app = express();
 footballNewsDB.connect();
 const PORT = process.env.PORT || 8080;
 
+app.use(cookieParser());
 app.use(
   express.urlencoded({
     extended: true,

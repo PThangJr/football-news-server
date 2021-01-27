@@ -74,13 +74,49 @@ class NewsController {
       res.json({ message: error });
     }
   }
-  // [GET] premier League
+  // [GET] Premier League
   async getPremierLeague(req, res) {
     try {
       const premierLeague = await NewsModel.find({ topic: 'Premier League' }).paginate(req);
       res.json(premierLeague);
     } catch (error) {
       res.json({ message: error });
+    }
+  }
+  //[GET] La Liga
+  async getLaLiga(req, res) {
+    try {
+      const laLiga = await NewsModel.find({ topic: 'La Liga' }).paginate(req);
+      res.json(laLiga);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+  //[GET] Serie A
+  async getSerieA(req, res) {
+    try {
+      const serieA = await NewsModel.find({ topic: 'Serie A' }).paginate(req);
+      res.json(serieA);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+  //[GET] Ligue 1
+  async getLigue1(req, res) {
+    try {
+      const ligue1 = await NewsModel.find({ topic: 'Ligue 1' }).paginate(req);
+      res.json(ligue1);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+  //[GET] Bundesliga
+  async getBundesliga(req, res) {
+    try {
+      const bundesliga = await NewsModel.find({ topic: 'Bundesliga' }).paginate(req);
+      res.json(bundesliga);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
     }
   }
 }

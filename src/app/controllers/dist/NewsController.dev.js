@@ -214,7 +214,7 @@ function () {
           }
         }
       }, null, null, [[2, 9]]);
-    } // [GET] premier League
+    } // [GET] Premier League
 
   }, {
     key: "getPremierLeague",
@@ -246,6 +246,146 @@ function () {
             case 10:
             case "end":
               return _context6.stop();
+          }
+        }
+      }, null, null, [[0, 7]]);
+    } //[GET] La Liga
+
+  }, {
+    key: "getLaLiga",
+    value: function getLaLiga(req, res) {
+      var laLiga;
+      return regeneratorRuntime.async(function getLaLiga$(_context7) {
+        while (1) {
+          switch (_context7.prev = _context7.next) {
+            case 0:
+              _context7.prev = 0;
+              _context7.next = 3;
+              return regeneratorRuntime.awrap(NewsModel.find({
+                topic: 'La Liga'
+              }).paginate(req));
+
+            case 3:
+              laLiga = _context7.sent;
+              res.json(laLiga);
+              _context7.next = 10;
+              break;
+
+            case 7:
+              _context7.prev = 7;
+              _context7.t0 = _context7["catch"](0);
+              res.status(500).json({
+                message: _context7.t0.message
+              });
+
+            case 10:
+            case "end":
+              return _context7.stop();
+          }
+        }
+      }, null, null, [[0, 7]]);
+    } //[GET] Serie A
+
+  }, {
+    key: "getSerieA",
+    value: function getSerieA(req, res) {
+      var serieA;
+      return regeneratorRuntime.async(function getSerieA$(_context8) {
+        while (1) {
+          switch (_context8.prev = _context8.next) {
+            case 0:
+              _context8.prev = 0;
+              _context8.next = 3;
+              return regeneratorRuntime.awrap(NewsModel.find({
+                topic: 'Serie A'
+              }).paginate(req));
+
+            case 3:
+              serieA = _context8.sent;
+              res.json(serieA);
+              _context8.next = 10;
+              break;
+
+            case 7:
+              _context8.prev = 7;
+              _context8.t0 = _context8["catch"](0);
+              res.status(500).json({
+                message: _context8.t0.message
+              });
+
+            case 10:
+            case "end":
+              return _context8.stop();
+          }
+        }
+      }, null, null, [[0, 7]]);
+    } //[GET] Ligue 1
+
+  }, {
+    key: "getLigue1",
+    value: function getLigue1(req, res) {
+      var ligue1;
+      return regeneratorRuntime.async(function getLigue1$(_context9) {
+        while (1) {
+          switch (_context9.prev = _context9.next) {
+            case 0:
+              _context9.prev = 0;
+              _context9.next = 3;
+              return regeneratorRuntime.awrap(NewsModel.find({
+                topic: 'Ligue 1'
+              }).paginate(req));
+
+            case 3:
+              ligue1 = _context9.sent;
+              res.json(ligue1);
+              _context9.next = 10;
+              break;
+
+            case 7:
+              _context9.prev = 7;
+              _context9.t0 = _context9["catch"](0);
+              res.status(500).json({
+                message: _context9.t0.message
+              });
+
+            case 10:
+            case "end":
+              return _context9.stop();
+          }
+        }
+      }, null, null, [[0, 7]]);
+    } //[GET] Bundesliga
+
+  }, {
+    key: "getBundesliga",
+    value: function getBundesliga(req, res) {
+      var bundesliga;
+      return regeneratorRuntime.async(function getBundesliga$(_context10) {
+        while (1) {
+          switch (_context10.prev = _context10.next) {
+            case 0:
+              _context10.prev = 0;
+              _context10.next = 3;
+              return regeneratorRuntime.awrap(NewsModel.find({
+                topic: 'Bundesliga'
+              }).paginate(req));
+
+            case 3:
+              bundesliga = _context10.sent;
+              res.json(bundesliga);
+              _context10.next = 10;
+              break;
+
+            case 7:
+              _context10.prev = 7;
+              _context10.t0 = _context10["catch"](0);
+              res.status(500).json({
+                message: _context10.t0.message
+              });
+
+            case 10:
+            case "end":
+              return _context10.stop();
           }
         }
       }, null, null, [[0, 7]]);
