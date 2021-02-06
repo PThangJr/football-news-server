@@ -2,15 +2,15 @@
 
 var AuthModel = require('../models/AuthModel');
 
-var validateMiddleware = function validateMiddleware(req, res, next) {
-  var _req$body, username, password, rePassword, email, user, message, emailDB;
+var checkUniqueAuthMiddleware = function checkUniqueAuthMiddleware(req, res, next) {
+  var _req$body, username, password, email, user, error, emailDB;
 
-  return regeneratorRuntime.async(function validateMiddleware$(_context) {
+  return regeneratorRuntime.async(function checkUniqueAuthMiddleware$(_context) {
     while (1) {
       switch (_context.prev = _context.next) {
         case 0:
           _context.prev = 0;
-          _req$body = req.body, username = _req$body.username, password = _req$body.password, rePassword = _req$body.rePassword, email = _req$body.email;
+          _req$body = req.body, username = _req$body.username, password = _req$body.password, email = _req$body.email;
           _context.next = 4;
           return regeneratorRuntime.awrap(AuthModel.findOne({
             username: username
@@ -18,12 +18,14 @@ var validateMiddleware = function validateMiddleware(req, res, next) {
 
         case 4:
           user = _context.sent;
-          message = [];
+          error = {
+            message: {},
+            statusCode: 200
+          };
 
           if (user) {
-            message.push({
-              username: 'Tài khoản đã tồn tại. Vui lòng nhập lại!'
-            });
+            error.message.username = 'Tài khoản đã tồn tại. Vui lòng nhập lại';
+            error.statusCode = 400;
           }
 
           _context.next = 9;
@@ -35,47 +37,34 @@ var validateMiddleware = function validateMiddleware(req, res, next) {
           emailDB = _context.sent;
 
           if (emailDB) {
-            message.push({
-              email: 'Email đã tồn tại. Vui lòng nhập lại!'
-            });
+            error.message.email = 'Email đã tồn tại. Vui lòng nhập lại';
+            error.statusCode = 400; // message.push({ email: 'Email đã tồn tại. Vui lòng nhập lại!' });
           }
 
-          if (password.length < 6) {
-            message.push({
-              password: 'Password must not be less than 6 characters '
-            });
+          if (!error.message) {
+            _context.next = 14;
+            break;
           }
 
-          if (password !== rePassword) {
-            message.push({
-              rePassword: 'Mật khẩu nhập lại không khớp. Vui lòng nhập lại!'
-            });
-          }
+          console.log(error);
+          throw error;
 
-          if (message.length > 0) {
-            res.status(400).json({
-              message: message
-            });
-          } else {
-            next();
-          }
-
-          _context.next = 19;
+        case 14:
+          next();
+          _context.next = 20;
           break;
 
-        case 16:
-          _context.prev = 16;
+        case 17:
+          _context.prev = 17;
           _context.t0 = _context["catch"](0);
-          res.status(500).json({
-            message: _context.t0.message
-          });
+          next(_context.t0);
 
-        case 19:
+        case 20:
         case "end":
           return _context.stop();
       }
     }
-  }, null, null, [[0, 16]]);
+  }, null, null, [[0, 17]]);
 };
 
-module.exports = validateMiddleware;
+module.exports = checkUniqueAuthMiddleware;

@@ -4,21 +4,29 @@ var jwt = require('jsonwebtoken');
 
 var authMiddleware = function authMiddleware(req, res, next) {
   try {
-    var token = req.header('Authorization');
-    if (!token) return res.status(500).json({
-      message: 'Invalid Authorization'
-    });
+    var access_token = req.header('Authorization');
+
+    if (access_token) {
+      var token = access_token.replace('Bearer ', '');
+    }
+
+    if (!token) {
+      var error = new Error('Invalid Authorization. Please Login or Register');
+      throw error;
+    }
+
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, user) {
-      if (err) return res.status(500).json({
-        message: 'Invalid Authorization'
-      });
+      if (err) {
+        var _error = new Error('Invalid Authorization. Please Login or Register');
+
+        throw _error;
+      }
+
       req.user = user;
       next();
     });
   } catch (error) {
-    res.status(500).json({
-      message: error.message
-    });
+    next(error);
   }
 };
 

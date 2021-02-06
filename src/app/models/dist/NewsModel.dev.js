@@ -3,6 +3,10 @@
 var mongoose = require('mongoose');
 
 var Schema = mongoose.Schema;
+
+var slug = require('mongoose-slug-generator');
+
+mongoose.plugin(slug);
 var NewsSchema = new Schema({
   title: {
     type: String,
@@ -16,7 +20,6 @@ var NewsSchema = new Schema({
   },
   description: {
     type: String,
-    required: true,
     trim: true
   },
   content: {
@@ -35,7 +38,14 @@ var NewsSchema = new Schema({
     type: Array
   },
   tournament: {
-    type: Array
+    type: String,
+    required: true,
+    trim: true
+  },
+  slug: {
+    type: String,
+    slug: 'title',
+    unique: true
   }
 }, {
   timestamps: true

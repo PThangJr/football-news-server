@@ -1,16 +1,19 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const slug = require('mongoose-slug-generator');
+mongoose.plugin(slug);
 
 const NewsSchema = new Schema(
   {
     title: { type: String, required: true, trim: true },
     topic: { type: String, required: true, trim: true },
-    description: { type: String, required: true, trim: true },
+    description: { type: String, trim: true },
     content: { type: String, required: true, trim: true },
     views: { type: Number, trim: true },
-    thumbnail: { type: String },
+    thumbnail: { type: String, },
     likes: { type: Array },
-    tournament: { type: Array },
+    tournament: { type: String, required: true, trim: true },
+    slug: { type: String, slug: 'title', unique: true },
   },
   {
     timestamps: true,

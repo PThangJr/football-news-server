@@ -3,10 +3,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 class AuthController {
   // [POST] create account
-  async register(req, res) {
+  async register(req, res, next) {
     try {
       const { username, password, email } = req.body;
-      const passwordHash = await bcrypt.hash(password, 10);
+      const passwordHash = password !== '' ? await bcrypt.hash(password, 10) : '';
       // Save User in MongoDB
       const newUser = new AuthModel({
         username,
@@ -20,10 +20,10 @@ class AuthController {
       //Refresh Token
       const refresh_token = createRefreshToken({ id: newUser._id, username: newUser.username, email: newUser.email });
 
-      res.cookie('refresh_token', refresh_token, {
-        httpOnly: true,
-        path: '/api/user/refresh_token',
-      });
+      // res.cookie('refresh_token', refresh_token, {
+      //   httpOnly: true,
+      //   path: '/api/user/refresh_token',
+      // });
 
       return res.json({
         user: {
@@ -32,10 +32,13 @@ class AuthController {
           role: 1,
         },
         access_token,
+        status: 'success',
       });
-      // return res.json({ user: newUser, message: 'Register Successfully' });
+      // return res.json({ user: newUser, status: 'success' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      console.log(error);
+      // res.json(error);
+      next(error);
     }
   }
   // [TOKEN] Refresh Token
@@ -103,6 +106,22 @@ class AuthController {
       const user = await AuthModel.findOne({ _id: req.user.id }).select('-password');
 
       res.json({ user });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+  // [POST] admin
+  async admin(req, res) {
+    try {
+      const { username, password } = req.body;
+      const user = await AuthModel.findOne({ username, role: 0 });
+      if (!user) return res.status(400).json({ message: 'Tài khoản không tồn tại. Vui lòng nhập lại' });
+      const isPassword = await bcrypt.compare(password, user.password);
+      if (!isPassword) return res.status(400).json({ message: 'Mật khẩu không đúng. Vui lòng nhập lại' });
+
+      //Send Token
+      const access_token = createAccessToken({ id: user._id });
+      res.status(200).json({ access_token });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

@@ -2,10 +2,6 @@
 
 var mongoose = require('mongoose');
 
-var _require = require('../config/config'),
-    mongoDBConfig = _require.mongoDBConfig; // const { PORT, HOST, COLLECTION } = mongoDBConfig;
-
-
 var connect = function connect() {
   return regeneratorRuntime.async(function connect$(_context) {
     while (1) {
@@ -13,10 +9,11 @@ var connect = function connect() {
         case 0:
           _context.prev = 0;
           _context.next = 3;
-          return regeneratorRuntime.awrap(mongoose.connect(process.env.MONGGO_SERVER, {
+          return regeneratorRuntime.awrap(mongoose.connect(process.env.MONGODB_ATLAS_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            useCreateIndex: true
+            useCreateIndex: true,
+            useFindAndModify: false
           }));
 
         case 3:

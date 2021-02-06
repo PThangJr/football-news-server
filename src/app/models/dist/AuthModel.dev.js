@@ -2,35 +2,34 @@
 
 var mongoose = require('mongoose');
 
+var uniqueValidator = require('mongoose-unique-validator');
+
 var Schema = mongoose.Schema;
 var authSchema = new Schema({
   username: {
     type: String,
-    require: true,
+    required: [true, 'Tài khoản không được để trống'],
     trim: true,
     unique: true
   },
   email: {
     type: String,
-    require: true,
+    required: [true, 'Email không được để trống'],
     trim: true,
     unique: true
   },
   password: {
     type: String,
-    require: true,
+    required: [true, 'Password không được để trống'],
     trim: true
   },
-  rePassword: {
-    type: String,
-    require: true,
-    trim: true
-  },
+  // rePassword: { type: String, required: true, trim: true },
   role: {
     type: Number,
     "default": 1
   }
 }, {
   timestamps: true
-});
+}); // authSchema.plugin(uniqueValidator, { message: `{PATH} đã tồn tại. Vui lòng nhập lại` });
+
 module.exports = mongoose.model('auths', authSchema);

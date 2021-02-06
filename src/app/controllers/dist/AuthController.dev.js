@@ -22,7 +22,7 @@ function () {
   _createClass(AuthController, [{
     key: "register",
     // [POST] create account
-    value: function register(req, res) {
+    value: function register(req, res, next) {
       var _req$body, username, password, email, passwordHash, newUser, access_token, refresh_token;
 
       return regeneratorRuntime.async(function register$(_context) {
@@ -31,21 +31,35 @@ function () {
             case 0:
               _context.prev = 0;
               _req$body = req.body, username = _req$body.username, password = _req$body.password, email = _req$body.email;
-              _context.next = 4;
+
+              if (!(password !== '')) {
+                _context.next = 8;
+                break;
+              }
+
+              _context.next = 5;
               return regeneratorRuntime.awrap(bcrypt.hash(password, 10));
 
-            case 4:
-              passwordHash = _context.sent;
+            case 5:
+              _context.t0 = _context.sent;
+              _context.next = 9;
+              break;
+
+            case 8:
+              _context.t0 = '';
+
+            case 9:
+              passwordHash = _context.t0;
               // Save User in MongoDB
               newUser = new AuthModel({
                 username: username,
                 email: email,
                 password: passwordHash
               });
-              _context.next = 8;
+              _context.next = 13;
               return regeneratorRuntime.awrap(newUser.save());
 
-            case 8:
+            case 13:
               //Create access token
               access_token = createAccessToken({
                 id: newUser._id,
@@ -57,33 +71,34 @@ function () {
                 id: newUser._id,
                 username: newUser.username,
                 email: newUser.email
-              });
-              res.cookie('refresh_token', refresh_token, {
-                httpOnly: true,
-                path: '/api/user/refresh_token'
-              });
+              }); // res.cookie('refresh_token', refresh_token, {
+              //   httpOnly: true,
+              //   path: '/api/user/refresh_token',
+              // });
+
               return _context.abrupt("return", res.json({
                 user: {
                   username: newUser.username,
                   email: newUser.email,
                   role: 1
                 },
-                access_token: access_token
+                access_token: access_token,
+                status: 'success'
               }));
 
-            case 14:
-              _context.prev = 14;
-              _context.t0 = _context["catch"](0);
-              res.status(500).json({
-                message: _context.t0.message
-              });
+            case 18:
+              _context.prev = 18;
+              _context.t1 = _context["catch"](0);
+              console.log(_context.t1); // res.json(error);
 
-            case 17:
+              next(_context.t1);
+
+            case 22:
             case "end":
               return _context.stop();
           }
         }
-      }, null, null, [[0, 14]]);
+      }, null, null, [[0, 18]]);
     } // [TOKEN] Refresh Token
 
   }, {
@@ -276,6 +291,77 @@ function () {
           }
         }
       }, null, null, [[0, 7]]);
+    } // [POST] admin
+
+  }, {
+    key: "admin",
+    value: function admin(req, res) {
+      var _req$body3, username, password, user, isPassword, access_token;
+
+      return regeneratorRuntime.async(function admin$(_context5) {
+        while (1) {
+          switch (_context5.prev = _context5.next) {
+            case 0:
+              _context5.prev = 0;
+              _req$body3 = req.body, username = _req$body3.username, password = _req$body3.password;
+              _context5.next = 4;
+              return regeneratorRuntime.awrap(AuthModel.findOne({
+                username: username,
+                role: 0
+              }));
+
+            case 4:
+              user = _context5.sent;
+
+              if (user) {
+                _context5.next = 7;
+                break;
+              }
+
+              return _context5.abrupt("return", res.status(400).json({
+                message: 'Tài khoản không tồn tại. Vui lòng nhập lại'
+              }));
+
+            case 7:
+              _context5.next = 9;
+              return regeneratorRuntime.awrap(bcrypt.compare(password, user.password));
+
+            case 9:
+              isPassword = _context5.sent;
+
+              if (isPassword) {
+                _context5.next = 12;
+                break;
+              }
+
+              return _context5.abrupt("return", res.status(400).json({
+                message: 'Mật khẩu không đúng. Vui lòng nhập lại'
+              }));
+
+            case 12:
+              //Send Token
+              access_token = createAccessToken({
+                id: user._id
+              });
+              res.status(200).json({
+                access_token: access_token
+              });
+              _context5.next = 19;
+              break;
+
+            case 16:
+              _context5.prev = 16;
+              _context5.t0 = _context5["catch"](0);
+              res.status(500).json({
+                message: _context5.t0.message
+              });
+
+            case 19:
+            case "end":
+              return _context5.stop();
+          }
+        }
+      }, null, null, [[0, 16]]);
     }
   }]);
 

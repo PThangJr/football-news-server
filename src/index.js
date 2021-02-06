@@ -4,8 +4,9 @@ const cors = require('cors');
 const route = require('./routes');
 const footballNewsDB = require('./config/footballNewsDB');
 const cookieParser = require('cookie-parser');
-
+const errorHandling = require('./app/error-handling/errorHandling');
 // console.log(process.env.PORT);
+const bcrypt = require('bcrypt');
 
 const app = express();
 
@@ -21,11 +22,19 @@ app.use(
 app.use(express.json());
 //Middleware fix CORS
 app.use(cors());
-
-//Middleware
+// const passwordHash = bcrypt.hash('123456', 10).then((res) => {
+//   console.log(res);
+// });
 
 //Routes
 route(app);
+
+app.use((req, res, next) => {
+  const error = new Error('Page not found');
+  error.statusCode = 404;
+  next(error);
+});
+app.use(errorHandling);
 
 app.listen(PORT, () => {
   console.log(`App start at PORT: ${PORT}`);
