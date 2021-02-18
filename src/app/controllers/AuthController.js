@@ -20,11 +20,6 @@ class AuthController {
       //Refresh Token
       const refresh_token = createRefreshToken({ id: newUser._id, username: newUser.username, email: newUser.email });
 
-      // res.cookie('refresh_token', refresh_token, {
-      //   httpOnly: true,
-      //   path: '/api/user/refresh_token',
-      // });
-
       return res.json({
         user: {
           username: newUser.username,
@@ -34,7 +29,6 @@ class AuthController {
         access_token,
         status: 'success',
       });
-      // return res.json({ user: newUser, status: 'success' });
     } catch (error) {
       console.log(error);
       // res.json(error);
@@ -127,9 +121,6 @@ class AuthController {
     }
   }
 }
-
-//Error
-// res.status(500).json({ message: error.message });
 
 const createAccessToken = (user) => {
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' });

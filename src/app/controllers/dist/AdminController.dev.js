@@ -12,6 +12,8 @@ var bcrypt = require('bcrypt');
 
 var jwt = require('jsonwebtoken');
 
+var createError = require('http-errors');
+
 var AdminController =
 /*#__PURE__*/
 function () {
@@ -22,8 +24,8 @@ function () {
   _createClass(AdminController, [{
     key: "login",
     // [POST] Login Admin
-    value: function login(req, res) {
-      var _req$body, username, password, user, isPassword, access_token;
+    value: function login(req, res, next) {
+      var _req$body, username, password, user, error, isPassword, _error, access_token;
 
       return regeneratorRuntime.async(function login$(_context) {
         while (1) {
@@ -33,41 +35,48 @@ function () {
               _req$body = req.body, username = _req$body.username, password = _req$body.password;
               _context.next = 4;
               return regeneratorRuntime.awrap(AuthModel.findOne({
-                username: username
-              }));
+                username: username,
+                role: 0
+              }).exec());
 
             case 4:
               user = _context.sent;
 
               if (user) {
-                _context.next = 7;
+                _context.next = 9;
                 break;
               }
 
-              return _context.abrupt("return", res.status(400).json({
-                username: 'Tài khoản không đúng. Vui lòng nhập lại'
-              }));
-
-            case 7:
-              _context.next = 9;
-              return regeneratorRuntime.awrap(bcrypt.compare(password, user.password));
+              error = {
+                message: {
+                  username: 'Tài khoản không đúng. Vui lòng nhập lại'
+                }
+              };
+              error.statusCode = 400;
+              throw error;
 
             case 9:
+              _context.next = 11;
+              return regeneratorRuntime.awrap(bcrypt.compare(password, user.password));
+
+            case 11:
               isPassword = _context.sent;
 
               if (isPassword) {
-                _context.next = 13;
+                _context.next = 16;
                 break;
               }
 
-              console.log(isPassword);
-              return _context.abrupt("return", res.status(400).json({
-                password: 'Mật khẩu không đúng. Vui lòng nhập lại'
-              }));
+              _error = {
+                message: {
+                  password: 'Mật khẩu không đúng. Vui lòng nhập lại'
+                }
+              };
+              _error.statusCode = 400;
+              throw _error;
 
-            case 13:
-              console.log('yes'); //Send token
-
+            case 16:
+              //Send token
               access_token = createAccessToken({
                 id: user._id
               });
@@ -75,22 +84,20 @@ function () {
                 username: user.username,
                 access_token: access_token
               });
-              _context.next = 21;
+              _context.next = 23;
               break;
 
-            case 18:
-              _context.prev = 18;
+            case 20:
+              _context.prev = 20;
               _context.t0 = _context["catch"](0);
-              res.status(500).json({
-                message: _context.t0.message
-              });
+              next(_context.t0);
 
-            case 21:
+            case 23:
             case "end":
               return _context.stop();
           }
         }
-      }, null, null, [[0, 18]]);
+      }, null, null, [[0, 20]]);
     }
   }]);
 

@@ -12,6 +12,7 @@ var authMiddleware = function authMiddleware(req, res, next) {
 
     if (!token) {
       var error = new Error('Invalid Authorization. Please Login or Register');
+      error.statusCode = 401;
       throw error;
     }
 
@@ -19,6 +20,7 @@ var authMiddleware = function authMiddleware(req, res, next) {
       if (err) {
         var _error = new Error('Invalid Authorization. Please Login or Register');
 
+        _error.statusCode = 401;
         throw _error;
       }
 

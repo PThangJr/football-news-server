@@ -10,12 +10,12 @@ mongoose.plugin(slug);
 var NewsSchema = new Schema({
   title: {
     type: String,
-    required: true,
+    required: [true, 'Title không được để trống. Vui lòng thử lại'],
     trim: true
   },
   topic: {
     type: String,
-    required: true,
+    required: [true, 'Topic không được để trống. Vui lòng thử lại'],
     trim: true
   },
   description: {
@@ -24,7 +24,7 @@ var NewsSchema = new Schema({
   },
   content: {
     type: String,
-    required: true,
+    required: [true, 'Nội dung không được để trống. Vui lòng thử lại'],
     trim: true
   },
   views: {
@@ -39,7 +39,7 @@ var NewsSchema = new Schema({
   },
   tournament: {
     type: String,
-    required: true,
+    required: [true, 'Tournament không được để trống. Vui lòng thử lại'],
     trim: true
   },
   slug: {

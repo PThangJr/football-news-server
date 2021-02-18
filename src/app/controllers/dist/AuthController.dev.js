@@ -71,11 +71,7 @@ function () {
                 id: newUser._id,
                 username: newUser.username,
                 email: newUser.email
-              }); // res.cookie('refresh_token', refresh_token, {
-              //   httpOnly: true,
-              //   path: '/api/user/refresh_token',
-              // });
-
+              });
               return _context.abrupt("return", res.json({
                 user: {
                   username: newUser.username,
@@ -366,9 +362,7 @@ function () {
   }]);
 
   return AuthController;
-}(); //Error
-// res.status(500).json({ message: error.message });
-
+}();
 
 var createAccessToken = function createAccessToken(user) {
   return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {

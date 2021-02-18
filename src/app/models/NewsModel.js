@@ -5,14 +5,14 @@ mongoose.plugin(slug);
 
 const NewsSchema = new Schema(
   {
-    title: { type: String, required: true, trim: true },
-    topic: { type: String, required: true, trim: true },
+    title: { type: String, required: [true, 'Title không được để trống. Vui lòng thử lại'], trim: true },
+    topic: { type: String, required: [true, 'Topic không được để trống. Vui lòng thử lại'], trim: true },
     description: { type: String, trim: true },
-    content: { type: String, required: true, trim: true },
+    content: { type: String, required: [true, 'Nội dung không được để trống. Vui lòng thử lại'], trim: true },
     views: { type: Number, trim: true },
-    thumbnail: { type: String, },
+    thumbnail: { type: String },
     likes: { type: Array },
-    tournament: { type: String, required: true, trim: true },
+    tournament: { type: String, required: [true, 'Tournament không được để trống. Vui lòng thử lại'], trim: true },
     slug: { type: String, slug: 'title', unique: true },
   },
   {

@@ -11,7 +11,7 @@ const bcrypt = require('bcrypt');
 const app = express();
 
 footballNewsDB.connect();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 5000;
 
 app.use(cookieParser());
 app.use(

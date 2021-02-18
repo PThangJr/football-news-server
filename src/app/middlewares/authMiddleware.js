@@ -7,11 +7,13 @@ const authMiddleware = (req, res, next) => {
     }
     if (!token) {
       const error = new Error('Invalid Authorization. Please Login or Register');
+      error.statusCode = 401;
       throw error;
     }
     jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
       if (err) {
         const error = new Error('Invalid Authorization. Please Login or Register');
+        error.statusCode = 401;
         throw error;
       }
       req.user = user;
