@@ -10,10 +10,21 @@ const NewsSchema = new Schema(
     description: { type: String, trim: true },
     content: { type: String, required: [true, 'Nội dung không được để trống. Vui lòng thử lại'], trim: true },
     views: { type: Number, trim: true },
-    thumbnail: { type: String },
-    likes: { type: Array },
-    tournament: { type: String, required: [true, 'Tournament không được để trống. Vui lòng thử lại'], trim: true },
+    thumbnail: { public_id: { type: String, required: true }, secure_url: { type: String, required: true } },
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Auth',
+      },
+    ],
+    isUserLiked: { type: Boolean, default: false },
+    tournament: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tournament',
+    },
     slug: { type: String, slug: 'title', unique: true },
+    author: { type: mongoose.Schema.Types.ObjectId },
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   },
   {
     timestamps: true,
@@ -33,4 +44,4 @@ NewsSchema.query.paginate = function (req) {
   }
 };
 
-module.exports = mongoose.model('news', NewsSchema);
+module.exports = mongoose.model('News', NewsSchema);

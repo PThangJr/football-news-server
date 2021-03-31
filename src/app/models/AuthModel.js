@@ -19,10 +19,11 @@ const authSchema = new Schema(
     password: { type: String, required: [true, 'Password không được để trống'], trim: true },
     // rePassword: { type: String, required: true, trim: true },
     role: { type: Number, default: 1 },
+    liked: { type: Array, default: [], ref: 'News' },
   },
   {
     timestamps: true,
   }
 );
 // authSchema.plugin(uniqueValidator, { message: `{PATH} đã tồn tại. Vui lòng nhập lại` });
-module.exports = mongoose.model('auths', authSchema);
+module.exports = mongoose.model('Auth', authSchema);

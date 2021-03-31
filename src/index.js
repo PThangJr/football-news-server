@@ -7,7 +7,6 @@ const cookieParser = require('cookie-parser');
 const errorHandling = require('./app/error-handling/errorHandling');
 // console.log(process.env.PORT);
 const bcrypt = require('bcrypt');
-
 const app = express();
 
 footballNewsDB.connect();

@@ -1,6 +1,5 @@
 const errorHandling = (err, req, res, next) => {
   res.status(err.statusCode || 500);
-
   const { errors } = err;
   if (errors) {
     const result = {};

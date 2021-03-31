@@ -97,9 +97,9 @@ class AuthController {
   //[GET] account
   async getUser(req, res) {
     try {
-      const user = await AuthModel.findOne({ _id: req.user.id }).select('-password');
+      const infoUser = await AuthModel.findOne({ _id: req.user.id }).select('-password');
 
-      res.json({ user });
+      res.status(200).json({ infoUser });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

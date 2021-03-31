@@ -1,4 +1,10 @@
 const NewsModel = require('../models/NewsModel');
+const TournamentsModel = require('../models/TournamentsModel');
+const CommentsModel = require('../models/CommentsModel');
+const slugify = require('slugify');
+const shortid = require('shortid');
+const AuthModel = require('../models/AuthModel');
+const cloudinary = require('../../cloudinary');
 // const { pagination } = require('../../config/config');
 class NewsController {
   constructor() {}
@@ -6,7 +12,10 @@ class NewsController {
   //[GET] all news
   async index(req, res, next) {
     try {
-      const allFootballNews = await NewsModel.find({}).paginate(req);
+      const allFootballNews = await NewsModel.find({}).paginate(req).populate({
+        path: 'tournament',
+        select: 'name slug _id',
+      });
       const total = await NewsModel.find({}).countDocuments();
 
       if (allFootballNews.length > 0) {
@@ -22,51 +31,27 @@ class NewsController {
   }
 
   //[GET] new by id
-  async getNewsById(req, res) {
-    const { newId } = req.params;
-    try {
-      const newById = await NewsModel.findById(newId).exec();
-      if (newById) {
-        return res.status(200).json({ data: newById });
-      } else {
-        return res.status(400).json({ message: 'Dữ liệu không tồn tại!' });
-      }
-    } catch (error) {
-      res.status(500).json({ message: 'Can not find news!!!' });
-    }
-  }
-  //[GET] new by slug
-  async getNewBySlug(req, res, next) {
-    const { slug } = req.params;
-    try {
-      const newBySlug = await NewsModel.findOne({ slug }).exec();
-      if (newBySlug) {
-        return res.status(200).json({ data: newBySlug });
-      } else {
-        const error = new Error('Bài viết không tồn tại');
-        error.statusCode = 404;
-        throw error;
-        // return res.status(400).json({ message: 'Dữ liệu không tồn tại' });
-      }
-    } catch (error) {
-      next(error);
-      // res.status(500).json({ message: 'Can not find news!!!' });
-    }
-  }
+
   //[POST] create new
   async createNew(req, res, next) {
     try {
-      const { title, description, content, thumbnail, topic, views, likes, tournament } = req.body;
-      // console.log(req.body);
+      const { title, description, content, topic, views, likes, tournament } = req.body;
+      const result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/thumbnail' });
+      // console.log(result);
       const createNew = new NewsModel({
         title,
         description,
-        thumbnail,
+        thumbnail: {
+          public_id: result.public_id,
+          secure_url: result.secure_url,
+        },
         content,
         topic,
         views,
         likes,
         tournament,
+        author: req.user.id,
+        slug: slugify(title, { lower: true }) + '.' + shortid.generate(),
       });
       const newPost = await createNew.save();
       if (!newPost) {
@@ -76,7 +61,6 @@ class NewsController {
       }
       res.status(200).json({ data: newPost, message: 'Thêm dữ liệu thành công' });
     } catch (error) {
-      // res.json(error);
       next(error);
     }
   }
@@ -97,106 +81,58 @@ class NewsController {
     }
   }
 
-  // [DELETE] delete by slug
-  async removeNewBySlug(req, res, next) {
+  async getNewsByTournament(req, res, next) {
     try {
-      const { slug } = req.params;
-
-      const newBySlug = await NewsModel.findOneAndDelete({ slug });
-      if (!newBySlug) {
-        const error = new Error('Bài viết không tồn tại. Vui lòng thử lại');
-        error.statusCode = 404;
-        throw error;
-      }
-      res.status(200).json({ data: newBySlug, message: 'Xóa bài viết thành công' });
-    } catch (error) {
-      next(error);
-    }
+      const { tournament } = req.params;
+      const tour = await TournamentsModel.findOne({ slug: tournament });
+      // const newByTournament = await NewsModel.find({ tournament: { $in: tour._id } }).paginate(req);
+      const newByTournament = await NewsModel.find({ tournament: tour._id })
+        .populate({ path: 'tournament', select: 'name slug _id' })
+        .paginate(req);
+      const total = await NewsModel.find({ tournament: tour._id }).countDocuments();
+      res.status(200).json({ data: newByTournament, total });
+      // res.json({ result: req.params.tournament });
+    } catch (error) {}
   }
-
-  // [PUT] Update new
-  async updateNew(req, res) {
+  async updateNewByTournament(req, res, next) {
     try {
       const { newId } = req.params;
-      const { title, description, content, topic, views, likes } = req.body;
-      const updatedNew = await NewsModel.updateOne(
-        { _id: newId },
-        { title, description, content, topic, views, likes }
-      );
-      res.json(updatedNew);
-    } catch (error) {
-      res.json({ message: error });
-    }
-  }
-  // [PUT] Update new by Slug
-  async updateNewBySlug(req, res, next) {
-    try {
-      const { slug } = req.params;
-      const { title, description, content, topic, tournament, thumbnail } = req.body;
-      const updatedNew = await NewsModel.findOneAndUpdate(
-        { slug },
-        { title, thumbnail, description, content, topic, tournament }
-      );
-      if (!updatedNew) {
-        const error = new Error('Bài viết không tồn tại. Vui lòng thử lại');
-        error.statusCode = 404;
-        throw error;
+      const { title, description, content, topic, views, likes, thumbnail, comments } = req.body;
+      let update;
+      if (title) {
+        update = {
+          title,
+          description,
+          content,
+          topic,
+          views,
+          likes,
+          thumbnail,
+          slug: slugify(title, { lower: true }) + '.' + shortid.generate(),
+        };
+      } else {
+        update = { title, description, content, topic, views, likes };
       }
-      return res.status(200).json({ data: updatedNew, message: 'Sửa bài viết thành công' });
+      const newUpdated = await NewsModel.updateOne({ _id: newId }, update);
+      res.json({ newUpdated });
     } catch (error) {
       next(error);
     }
   }
-  // [GET] Premier League
-  async getPremierLeague(req, res) {
+  async getComments(req, res, next) {
     try {
-      const premierLeague = await NewsModel.find({ topic: 'Premier League' }).paginate(req);
-      const total = await NewsModel.find({ topic: 'Premier League' }).countDocuments();
-      // console.log(total);
-      res.json({ data: premierLeague, total });
-    } catch (error) {
-      res.json({ message: error });
-    }
-  }
-  //[GET] La Liga
-  async getLaLiga(req, res) {
-    try {
-      const laLiga = await NewsModel.find({ topic: 'La Liga' }).paginate(req);
-      const total = await NewsModel.find({ topic: 'La Liga' }).countDocuments();
-      res.json({ data: laLiga, total });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
-  //[GET] Serie A
-  async getSerieA(req, res) {
-    try {
-      const serieA = await NewsModel.find({ topic: 'Serie A' }).paginate(req);
-      const total = await NewsModel.find({ topic: 'Serie A' }).countDocuments();
-      res.json({ data: serieA, total });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
-  //[GET] Ligue 1
-  async getLigue1(req, res) {
-    try {
-      const ligue1 = await NewsModel.find({ topic: 'Ligue 1' }).paginate(req);
-      const total = await NewsModel.find({ topic: 'Ligue 1' }).countDocuments();
+      const { slug } = req.params;
+      const newBySlug = await NewsModel.findOne({ slug });
+      if (newBySlug) {
+        const comment = await CommentsModel.find({ newId: newBySlug._id, _id: { $in: newBySlug.comments } }).populate({
+          path: 'userId',
+          select: '-password',
+        });
 
-      res.json({ data: ligue1, total });
+        res.json({ comment });
+      }
     } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  }
-  //[GET] Bundesliga
-  async getBundesliga(req, res) {
-    try {
-      const bundesliga = await NewsModel.find({ topic: 'Bundesliga' }).paginate(req);
-      const total = await NewsModel.find({ topic: 'Bundesliga' }).countDocuments();
-      res.json({ data: bundesliga, total });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+      next(error);
     }
   }
 }
