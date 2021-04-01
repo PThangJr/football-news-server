@@ -13,4 +13,12 @@ const TournamentSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+TournamentSchema.query.sortable = function (req) {
+  const { column, type } = req.query;
+  return this.sort({ [column]: type });
+};
+TournamentSchema.query.findAndFilter = function (req) {
+  const { search } = req.query;
+  return this.find({});
+};
 module.exports = mongoose.model('Tournament', TournamentSchema);

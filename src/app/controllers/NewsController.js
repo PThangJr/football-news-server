@@ -6,16 +6,38 @@ const shortid = require('shortid');
 const AuthModel = require('../models/AuthModel');
 const cloudinary = require('../../cloudinary');
 // const { pagination } = require('../../config/config');
+class APIfeatures {
+  constructor(query, queryString) {
+    this.query = query;
+    this.queryString = queryString;
+  }
+  filtering() {
+    const queryObj = { ...this.queryString };
+    console.log({ before: queryObj });
+    const excludedFields = ['_page', '_sort', '_limit', 'type', '_search'];
+    excludedFields.forEach((ef) => delete queryObj[ef]);
+    let queryStr = JSON.stringify(queryObj);
+
+    queryStr = queryStr.replace(/\b(gte|gt|lt|lte|regex)\b/g, (match) => '$' + match);
+    queryStr.title['$options'] = 'i';
+    console.log({ after: queryStr });
+    this.query.find(JSON.parse(queryStr));
+    return this;
+  }
+}
 class NewsController {
   constructor() {}
 
   //[GET] all news
   async index(req, res, next) {
     try {
-      const allFootballNews = await NewsModel.find({}).paginate(req).populate({
-        path: 'tournament',
-        select: 'name slug _id',
-      });
+      const allFootballNews = await NewsModel.find()
+        .paginate(req)
+        .populate({
+          path: 'tournament',
+          select: 'name slug _id',
+        })
+        .sortable(req);
       const total = await NewsModel.find({}).countDocuments();
 
       if (allFootballNews.length > 0) {
@@ -92,7 +114,9 @@ class NewsController {
       const total = await NewsModel.find({ tournament: tour._id }).countDocuments();
       res.status(200).json({ data: newByTournament, total });
       // res.json({ result: req.params.tournament });
-    } catch (error) {}
+    } catch (error) {
+      next(error);
+    }
   }
   async updateNewByTournament(req, res, next) {
     try {

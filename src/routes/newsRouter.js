@@ -5,6 +5,7 @@ const adminMiddleware = require('../app/middlewares/adminMiddleware');
 const NewsController = require('../app/controllers/NewsController');
 const router = express.Router();
 const upload = require('../multer');
+const searchMiddleware = require('../app/middlewares/searchMiddleware');
 router.get('/comments/:slug', NewsController.getComments);
 router.get('/:tournament', NewsController.getNewsByTournament);
 router.get('/', NewsController.index);

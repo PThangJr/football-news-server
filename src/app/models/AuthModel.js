@@ -20,6 +20,21 @@ const authSchema = new Schema(
     // rePassword: { type: String, required: true, trim: true },
     role: { type: Number, default: 1 },
     liked: { type: Array, default: [], ref: 'News' },
+    fullname: {
+      type: String,
+      trim: true,
+    },
+    age: {
+      type: Number,
+    },
+    gender: {
+      type: String,
+      enum: ['male', 'female', 'others'],
+    },
+    avatar: {
+      public_id: { type: String, trim: true, unique: true },
+      secure_url: { type: String, trim: true, unique: true },
+    },
   },
   {
     timestamps: true,

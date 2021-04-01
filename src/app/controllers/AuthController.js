@@ -1,6 +1,7 @@
 const AuthModel = require('../models/AuthModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const cloudinary = require('../../cloudinary');
 class AuthController {
   // [POST] create account
   async register(req, res, next) {
@@ -16,9 +17,19 @@ class AuthController {
       await newUser.save();
 
       //Create access token
-      const access_token = createAccessToken({ id: newUser._id, username: newUser.username, email: newUser.email });
+      const access_token = createAccessToken({
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+        avatar: newUser.avatar,
+      });
       //Refresh Token
-      const refresh_token = createRefreshToken({ id: newUser._id, username: newUser.username, email: newUser.email });
+      const refresh_token = createRefreshToken({
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+        avatar: newUser.avatar,
+      });
 
       return res.json({
         user: {
@@ -77,6 +88,7 @@ class AuthController {
           username: user.username,
           email: user.email,
           role: user.role,
+          avatar: user.avatar,
         },
         access_token,
       });
@@ -102,6 +114,27 @@ class AuthController {
       res.status(200).json({ infoUser });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  }
+  // [PUT] Update user
+  async updateUser(req, res, next) {
+    try {
+      const { id } = req.user;
+      const { update = {}, file } = req;
+
+      if (file) {
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+          folder: 'football-news/avatars',
+        });
+        update.avatar = {
+          public_id: result.public_id,
+          secure_url: result.secure_url,
+        };
+      }
+      const userUpdated = await AuthModel.updateOne({ _id: id }, update, { runValidators: true });
+      res.status(200).json({ userUpdated });
+    } catch (error) {
+      next(error);
     }
   }
   // [POST] admin

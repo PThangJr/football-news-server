@@ -7,7 +7,7 @@ class TournamentsController {
   constructor() {}
   //   [GET] All Tournaments
   async getAllTournaments(req, res, next) {
-    const tournaments = await TournamentsModel.find({});
+    const tournaments = await TournamentsModel.find({}).sortable(req);
     if (!tournaments) {
       res.status(200).json({ message: 'Không có giải đấu nào' });
     } else {

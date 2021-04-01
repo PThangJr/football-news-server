@@ -5,6 +5,8 @@ const route = require('./routes');
 const footballNewsDB = require('./config/footballNewsDB');
 const cookieParser = require('cookie-parser');
 const errorHandling = require('./app/error-handling/errorHandling');
+const bodyParser = require('body-parser');
+const sortMiddleware = require('./app/middlewares/sortMiddleware');
 // console.log(process.env.PORT);
 const bcrypt = require('bcrypt');
 const app = express();
@@ -19,12 +21,14 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(express.raw());
+app.use(express.text());
 //Middleware fix CORS
 app.use(cors());
 // const passwordHash = bcrypt.hash('123456', 10).then((res) => {
 //   console.log(res);
 // });
-
+app.use(sortMiddleware);
 //Routes
 route(app);
 

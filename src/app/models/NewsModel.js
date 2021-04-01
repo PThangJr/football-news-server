@@ -43,5 +43,8 @@ NewsSchema.query.paginate = function (req) {
     return this;
   }
 };
-
+NewsSchema.query.sortable = function (req) {
+  const { column, type } = req.query;
+  return this.sort({ [column]: type });
+};
 module.exports = mongoose.model('News', NewsSchema);
