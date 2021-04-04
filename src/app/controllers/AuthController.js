@@ -2,6 +2,7 @@ const AuthModel = require('../models/AuthModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('../../cloudinary');
+const { PromiseProvider } = require('mongoose');
 class AuthController {
   // [POST] create account
   async register(req, res, next) {
@@ -28,14 +29,15 @@ class AuthController {
         id: newUser._id,
         username: newUser.username,
         email: newUser.email,
-        avatar: newUser.avatar,
       });
 
       return res.json({
         user: {
           username: newUser.username,
           email: newUser.email,
-          role: 1,
+          avatar: newUser.avatar,
+          age: newUser.age,
+          gender: newUser.gender,
         },
         access_token,
         status: 'success',
@@ -82,13 +84,13 @@ class AuthController {
         httpOnly: true,
         path: '/api/user/refresh_token',
       });
-
       return res.json({
         user: {
           username: user.username,
           email: user.email,
-          role: user.role,
           avatar: user.avatar,
+          gender: user.gender,
+          age: user.age,
         },
         access_token,
       });
@@ -151,6 +153,31 @@ class AuthController {
       res.status(200).json({ access_token });
     } catch (error) {
       res.status(500).json({ message: error.message });
+    }
+  }
+  //[PUT] change password
+  async changePassword(req, res, next) {
+    try {
+      const { oldPassword, newPassword } = req.body;
+      if (oldPassword) {
+        const user = await AuthModel.findOne({ _id: req.user.id });
+        const isPassword = await bcrypt.compare(oldPassword, user.password);
+        if (isPassword) {
+          const hashOldPassword = await bcrypt.hash(newPassword, 10);
+          await AuthModel.findByIdAndUpdate(req.user.id, {
+            password: hashOldPassword,
+          });
+          res.json({ status: 'Success', message: 'Thay đổi mật khẩu thành công!' });
+        } else {
+          const error = {
+            oldPassword: 'Mật khẩu cũ không chính xác. Vui lòng nhập lại',
+            statusCode: 400,
+          };
+          throw error;
+        }
+      }
+    } catch (error) {
+      next(error);
     }
   }
 }

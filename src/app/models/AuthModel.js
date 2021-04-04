@@ -29,7 +29,7 @@ const authSchema = new Schema(
     },
     gender: {
       type: String,
-      enum: ['male', 'female', 'others'],
+      enum: ['Nam', 'Nữ', 'others'],
     },
     avatar: {
       public_id: { type: String, trim: true, unique: true },

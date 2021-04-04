@@ -51,7 +51,7 @@ class NewsController {
       next(error);
     }
   }
-
+  //[GET] get all news
   //[GET] new by id
 
   //[POST] create new

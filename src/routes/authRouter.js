@@ -19,6 +19,7 @@ router.put(
   upload.single('avatar'),
   authController.updateUser
 );
+router.put('/password', authMiddleware, authController.changePassword);
 // router.get('/admin', adminController.login);
 
 module.exports = router;
