@@ -10,12 +10,12 @@ const CommentsSchema = new mongoose.Schema(
 );
 
 CommentsSchema.query.paginate = function (req) {
-  let { _limit, _page } = req.query;
-  _limit = parseInt(_limit);
-  _page = parseInt(_page) || 1;
-  if (_page) {
-    const skip = _limit * (_page - 1);
-    return this.limit(_limit).skip(skip);
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page) || 1;
+  if (page) {
+    const skip = limit * (page - 1);
+    return this.limit(limit).skip(skip);
   } else {
     return this;
   }

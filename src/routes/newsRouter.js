@@ -6,11 +6,12 @@ const NewsController = require('../app/controllers/NewsController');
 const router = express.Router();
 const upload = require('../multer');
 const searchMiddleware = require('../app/middlewares/searchMiddleware');
+router.get('/', NewsController.index);
 router.get('/comments/:slug', NewsController.getComments);
 router.get('/:tournament', NewsController.getNewsByTournament);
-router.get('/', NewsController.index);
-router.put('/:newId', NewsController.updateNewByTournament);
-router.delete('/:newId', authMiddleware, adminMiddleware, NewsController.updateNewByTournament);
+router.put('/:newId', authMiddleware, adminMiddleware, upload.single('thumbnail'), NewsController.updateNewById);
+router.delete('/:newId', authMiddleware, adminMiddleware, NewsController.deleteNewById);
+router.put('/:newId', upload.single('thumbnail'), NewsController.testUpdate);
 
 router.post('/', authMiddleware, adminMiddleware, upload.single('thumbnail'), newsController.createNew);
 

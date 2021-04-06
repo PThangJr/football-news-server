@@ -7,11 +7,11 @@ const checkBodyEmptyMiddleware = require('../app/middlewares/checkBodyEmptyMiddl
 const upload = require('../multer');
 const router = express.Router();
 
-router.post('/register', checkUniqueAuthMiddleware, authController.register);
+router.post('/register', checkUniqueAuthMiddleware, upload.single('avatar'), authController.register);
 router.post('/login', authController.login);
 router.get('/logout', authController.logout);
 router.get('/refresh_token', authController.refreshToken);
-router.get('/information', authMiddleware, authController.getUser);
+router.get('/information', authMiddleware, authController.getInfoUser);
 router.put(
   '/information',
   authMiddleware,

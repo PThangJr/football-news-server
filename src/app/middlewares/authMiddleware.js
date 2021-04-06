@@ -1,24 +1,25 @@
 const jwt = require('jsonwebtoken');
-const authMiddleware = (req, res, next) => {
+const AuthModel = require('../models/AuthModel');
+const createError = require('http-errors');
+const authMiddleware = async (req, res, next) => {
   try {
     const access_token = req.header('Authorization');
     if (access_token) {
       var token = access_token.replace('Bearer ', '');
     }
     if (!token) {
-      const error = new Error('Invalid Authorization. Please Login or Register');
-      error.statusCode = 401;
-      throw error;
+      throw createError(401, 'Invalid Authorization. Please Login or Register');
     }
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-      if (err) {
-        const error = new Error('Invalid Authorization. Please Login or Register');
-        error.statusCode = 401;
-        throw error;
-      }
-      req.user = user;
-      next();
-    });
+    const userVerify = await jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    if (!userVerify) {
+      throw createError(401, 'Invalid Authorization. Please Login or Register');
+    }
+    const user = await AuthModel.findById(userVerify._id).select('-password');
+    if (!user) {
+      throw createError(401, 'Invalid Authorization. Please Login or Register');
+    }
+    req.user = user;
+    next();
   } catch (error) {
     next(error);
   }

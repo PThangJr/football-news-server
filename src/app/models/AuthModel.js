@@ -18,7 +18,7 @@ const authSchema = new Schema(
     },
     password: { type: String, required: [true, 'Password không được để trống'], trim: true },
     // rePassword: { type: String, required: true, trim: true },
-    role: { type: Number, default: 1 },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
     liked: { type: Array, default: [], ref: 'News' },
     fullname: {
       type: String,
@@ -26,14 +26,22 @@ const authSchema = new Schema(
     },
     age: {
       type: Number,
+      trim: true,
     },
     gender: {
       type: String,
-      enum: ['Nam', 'Nữ', 'others'],
+      enum: ['Nam', 'Nữ', 'Khác'],
+      trim: true,
     },
     avatar: {
-      public_id: { type: String, trim: true, unique: true },
-      secure_url: { type: String, trim: true, unique: true },
+      public_id: { type: String, trim: true, unique: true, default: 'football-news/avatars/default_avatar' },
+      secure_url: {
+        type: String,
+        trim: true,
+        unique: true,
+        default:
+          'https://res.cloudinary.com/dbfyyqmwr/image/upload/v1617707300/football-news/avatars/default_avatar.png',
+      },
     },
   },
   {

@@ -1,4 +1,5 @@
 const multer = require('multer');
+const shortid = require('shortid');
 // const storage = multer.diskStorage({});
 const storage = multer.diskStorage({
   filename: function (req, file, cb) {

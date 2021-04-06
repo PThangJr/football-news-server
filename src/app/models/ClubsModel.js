@@ -11,9 +11,10 @@ const clubSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  tournament: [
+  tournaments: [
     {
       type: mongoose.Schema.Types.ObjectId,
+      required: true,
       ref: 'Tournament',
     },
   ],
@@ -23,6 +24,7 @@ const clubSchema = new mongoose.Schema({
     unique: true,
     trim: true,
   },
+  results: [{ type: mongoose.Schema.Types.ObjectId }],
 });
 
-module.exports = mongoose.model('club', clubSchema);
+module.exports = mongoose.model('Club', clubSchema);

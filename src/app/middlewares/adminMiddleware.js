@@ -1,8 +1,7 @@
 const AuthModel = require('../models/AuthModel');
 const adminMiddleware = async (req, res, next) => {
   try {
-    const user = await AuthModel.findOne({ _id: req.user.id });
-    if (parseInt(user.role) === 0) next();
+    if (req.user.role === 'admin') next();
     else {
       const error = new Error('Admin resource access denied');
       throw error;

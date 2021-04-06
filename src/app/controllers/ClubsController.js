@@ -1,25 +1,27 @@
 const ClubsModel = require('../models/ClubsModel');
 const cloudinary = require('../../cloudinary');
 const slugify = require('slugify');
+const createError = require('http-errors');
 class ClubsController {
   async getAll(req, res, next) {
     try {
       const clubs = await ClubsModel.find();
-      res.json({ clubs });
+      res.status(200).json({ clubs });
     } catch (error) {
       next(error);
     }
   }
   async create(req, res, next) {
     try {
-      const { name, shortname, tournament } = req.body;
+      const newObject = { ...req.body };
+      const { name, shortname, tournaments } = req.body;
       const club = await ClubsModel.findOne({ name });
       if (club) {
-        const error = new Error('Tên đội bóng đã tồn tại. Vui lòng nhập lại');
-        error.statusCode = 400;
-        throw error;
+        throw createError(400, 'Tên đội bóng đã tồn tại. Vui lòng nhập lại');
       } else {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/clubs' });
+        if (req.file && name && shortname && tournaments) {
+          var result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/clubs' });
+        }
         const newClub = new ClubsModel({
           name,
           logo: {
@@ -29,9 +31,9 @@ class ClubsController {
           slug: slugify(name, { lower: true }),
           shortname,
         });
-        newClub.tournament.push(tournament);
+        newClub.tournaments.push(tournaments);
         await newClub.save();
-        res.status(200).json({ newClub });
+        res.status(201).json({ newClub });
       }
     } catch (error) {
       next(error);

@@ -2,13 +2,14 @@ const AuthModel = require('../models/AuthModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cloudinary = require('../../cloudinary');
-const { PromiseProvider } = require('mongoose');
 class AuthController {
   // [POST] create account
   async register(req, res, next) {
     try {
       const { username, password, email } = req.body;
       const passwordHash = password !== '' ? await bcrypt.hash(password, 10) : '';
+
+      // console.log(result);
       // Save User in MongoDB
       const newUser = new AuthModel({
         username,
@@ -19,19 +20,19 @@ class AuthController {
 
       //Create access token
       const access_token = createAccessToken({
-        id: newUser._id,
+        _id: newUser._id,
         username: newUser.username,
         email: newUser.email,
         avatar: newUser.avatar,
       });
       //Refresh Token
       const refresh_token = createRefreshToken({
-        id: newUser._id,
+        _id: newUser._id,
         username: newUser.username,
         email: newUser.email,
       });
 
-      return res.json({
+      return res.status(201).json({
         user: {
           username: newUser.username,
           email: newUser.email,
@@ -57,7 +58,7 @@ class AuthController {
       } else {
         jwt.verify(refresh_token, process.env.ACCESS_TOKEN_REFRESH, (err, user) => {
           if (err) return res.status(400).json({ message: 'Please Login or Register' });
-          const accessToken = createAccessToken({ id: user.id });
+          const accessToken = createAccessToken({ _id: user._id });
 
           res.json({ user, access_token: accessToken });
         });
@@ -68,24 +69,37 @@ class AuthController {
     }
   }
   //[POST] Login
-  async login(req, res) {
+  async login(req, res, next) {
     try {
       const { username, password } = req.body;
       const user = await AuthModel.findOne({ username });
-      if (!user) return res.status(400).json({ username: 'Tài khoản không tồn tại. Vui lòng nhập lại!' });
+      if (!user) {
+        const errors = {
+          username: 'Tài khoản không tồn tại. Vui lòng nhập lại!',
+          statusCode: 400,
+        };
+        throw errors;
+      }
       const isPassword = await bcrypt.compare(password, user.password);
-      if (!isPassword) return res.status(400).json({ password: 'Mật khẩu không đúng. Vui lòng nhập lại!' });
+      if (!isPassword) {
+        const errors = {
+          password: 'Mật khẩu không đúng. Vui lòng nhập lại!',
+          statusCode: 400,
+        };
+        throw errors;
+      }
       // Access Token
-      const access_token = createAccessToken({ id: user._id, username: user.username, email: user.email });
+      const access_token = createAccessToken({ _id: user._id, username: user.username, email: user.email });
       //Refresh Token
-      const refresh_token = createRefreshToken({ id: user._id, username: user.username, email: user.email });
+      const refresh_token = createRefreshToken({ _id: user._id, username: user.username, email: user.email });
 
       res.cookie('refresh_token', refresh_token, {
         httpOnly: true,
         path: '/api/user/refresh_token',
       });
-      return res.json({
+      return res.status(200).json({
         user: {
+          _id: user._id,
           username: user.username,
           email: user.email,
           avatar: user.avatar,
@@ -96,7 +110,7 @@ class AuthController {
       });
       // res.json({ message: 'Login successfully' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      next(error);
     }
   }
   //[GET] logout
@@ -105,35 +119,46 @@ class AuthController {
       await res.clearCookie('refresh_token', { path: '/api/user/refresh_token' });
       res.json({ message: 'Clear cookies' });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      next(error);
     }
   }
-  //[GET] account
-  async getUser(req, res) {
+  //[GET] Get Information User
+  async getInfoUser(req, res, next) {
     try {
       const infoUser = await AuthModel.findOne({ _id: req.user.id }).select('-password');
-
+      if (!infoUser) {
+        throw createError(404, 'Tài khoản không tồn tại!');
+      }
       res.status(200).json({ infoUser });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      next(error);
     }
   }
   // [PUT] Update user
   async updateUser(req, res, next) {
     try {
-      const { id } = req.user;
-      const { update = {}, file } = req;
-
-      if (file) {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-          folder: 'football-news/avatars',
-        });
+      const { file } = req;
+      const update = { ...req.body };
+      var options;
+      if (req.user.avatar.public_id === 'football-news/avatars/default_avatar') {
+        options = { folder: 'football-news/avatars' };
+      } else {
+        options = {
+          public_id: req.user.avatar.public_id,
+          overwrite: true,
+          unique_filename: true,
+        };
+      }
+      if (req.file) {
+        var result = await cloudinary.v2.uploader.upload(req.file.path, options);
+      }
+      if (result) {
         update.avatar = {
           public_id: result.public_id,
           secure_url: result.secure_url,
         };
       }
-      const userUpdated = await AuthModel.updateOne({ _id: id }, update, { runValidators: true });
+      const userUpdated = await AuthModel.findByIdAndUpdate(req.user._id, update);
       res.status(200).json({ userUpdated });
     } catch (error) {
       next(error);

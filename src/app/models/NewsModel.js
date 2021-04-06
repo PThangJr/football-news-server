@@ -5,10 +5,10 @@ mongoose.plugin(slug);
 
 const NewsSchema = new Schema(
   {
-    title: { type: String, required: [true, 'Title không được để trống. Vui lòng thử lại'], trim: true },
-    topic: { type: String, required: [true, 'Topic không được để trống. Vui lòng thử lại'], trim: true },
+    title: { type: String, required: true, trim: true },
+    topic: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
-    content: { type: String, required: [true, 'Nội dung không được để trống. Vui lòng thử lại'], trim: true },
+    content: { type: String, required: true, trim: true },
     views: { type: Number, trim: true },
     thumbnail: { public_id: { type: String, required: true }, secure_url: { type: String, required: true } },
     likes: [
@@ -17,13 +17,13 @@ const NewsSchema = new Schema(
         ref: 'Auth',
       },
     ],
-    isUserLiked: { type: Boolean, default: false },
     tournament: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Tournament',
     },
     slug: { type: String, slug: 'title', unique: true },
     author: { type: mongoose.Schema.Types.ObjectId },
+    trending: { type: Number, default: -1 },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   },
   {
@@ -33,12 +33,12 @@ const NewsSchema = new Schema(
 // Query Helper
 
 NewsSchema.query.paginate = function (req) {
-  let { _limit, _page } = req.query;
-  _limit = parseInt(_limit);
-  _page = parseInt(_page) || 1;
-  if (_page) {
-    const skip = _limit * (_page - 1);
-    return this.limit(_limit).skip(skip);
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page) || 1;
+  if (page) {
+    const skip = limit * (page - 1);
+    return this.limit(limit).skip(skip);
   } else {
     return this;
   }
