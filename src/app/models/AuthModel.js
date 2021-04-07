@@ -34,11 +34,12 @@ const authSchema = new Schema(
       trim: true,
     },
     avatar: {
-      public_id: { type: String, trim: true, unique: true, default: 'football-news/avatars/default_avatar' },
+      public_id: {
+        type: String,
+        default: 'football-news/avatars/default_avatar',
+      },
       secure_url: {
         type: String,
-        trim: true,
-        unique: true,
         default:
           'https://res.cloudinary.com/dbfyyqmwr/image/upload/v1617707300/football-news/avatars/default_avatar.png',
       },

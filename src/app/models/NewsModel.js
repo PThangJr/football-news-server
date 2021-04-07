@@ -9,7 +9,7 @@ const NewsSchema = new Schema(
     topic: { type: String, required: true, trim: true },
     description: { type: String, trim: true },
     content: { type: String, required: true, trim: true },
-    views: { type: Number, trim: true },
+    views: { type: Number, trim: true, default: 0 },
     thumbnail: { public_id: { type: String, required: true }, secure_url: { type: String, required: true } },
     likes: [
       {

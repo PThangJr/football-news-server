@@ -17,6 +17,12 @@ class DetailNewController {
           path: 'tournament',
           select: 'name slug _id',
         });
+      const newUpdated = await NewsModel.updateOne(
+        { slug },
+        {
+          views: newBySlug.views + 1,
+        }
+      );
       if (newBySlug) {
         res.status(200).send({ data: newBySlug });
       } else {

@@ -6,6 +6,7 @@ const tournamentsRouter = require('./tournamentsRouter');
 const commentsRouter = require('./commentsRouter');
 const clubsRouter = require('./clubsRouter');
 const resultsRouter = require('./resultsRouter');
+const videosRouter = require('./videosRouter');
 const route = (app) => {
   app.use('/api/v1/news', apiRouter);
   app.use('/api/v1/new-detail', newDetailRouter);
@@ -15,5 +16,6 @@ const route = (app) => {
   app.use('/api/v1/comments', commentsRouter);
   app.use('/api/v1/clubs', clubsRouter);
   app.use('/api/v1/results', resultsRouter);
+  app.use('/api/v1/videos', videosRouter);
 };
 module.exports = route;

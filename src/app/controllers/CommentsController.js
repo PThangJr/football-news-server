@@ -66,7 +66,7 @@ class CommentsController {
       const newBySlug = await NewsModel.findOne({ slug: slugNew });
       const newComment = new CommentsModel({
         newId: newBySlug._id,
-        userId: user.id,
+        userId: user._id,
         content,
       });
       await newComment.save();

@@ -14,16 +14,15 @@ class AuthController {
       const newUser = new AuthModel({
         username,
         email,
+
         password: passwordHash,
       });
       await newUser.save();
-
       //Create access token
       const access_token = createAccessToken({
         _id: newUser._id,
         username: newUser.username,
         email: newUser.email,
-        avatar: newUser.avatar,
       });
       //Refresh Token
       const refresh_token = createRefreshToken({

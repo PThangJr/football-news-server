@@ -3,9 +3,11 @@ const mongoose = require('mongoose');
 const CommentsSchema = new mongoose.Schema(
   {
     userId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Auth' },
-    newId: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'News' },
+    newId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    target: { type: String, enum: ['News', 'Videos'] },
     content: { type: String, require: true, trim: true },
   },
+
   { timestamps: true }
 );
 
