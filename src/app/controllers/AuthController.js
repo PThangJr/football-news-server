@@ -91,21 +91,16 @@ class AuthController {
       const access_token = createAccessToken({ _id: user._id, username: user.username, email: user.email });
       //Refresh Token
       const refresh_token = createRefreshToken({ _id: user._id, username: user.username, email: user.email });
-
+      // const infoUser = await AuthModel.findById(user._id).select('-password');
       res.cookie('refresh_token', refresh_token, {
         httpOnly: true,
         path: '/api/user/refresh_token',
       });
+      const infoUser = await AuthModel.findById(user._id).select('-password');
       return res.status(200).json({
-        user: {
-          _id: user._id,
-          username: user.username,
-          email: user.email,
-          avatar: user.avatar,
-          gender: user.gender,
-          age: user.age,
-        },
+        user: infoUser,
         access_token,
+        message: 'Login successfully',
       });
       // res.json({ message: 'Login successfully' });
     } catch (error) {

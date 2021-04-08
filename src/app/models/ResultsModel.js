@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const resultsSchema = mongoose.Schema(
   {
+    title: { type: String, trim: true, require: true },
     home: {
       clubId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -32,6 +33,19 @@ const resultsSchema = mongoose.Schema(
       goals: { type: Number, default: 0 },
     },
     tournament: { type: mongoose.Schema.Types.ObjectId, required: true, ref: 'Tournament' },
+    video: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Video',
+    },
+    endTime: {
+      type: Date,
+      require: true,
+    },
+    slug: {
+      type: String,
+      require: true,
+      trim: true,
+    },
   },
   { timestamps: true }
 );

@@ -204,6 +204,14 @@ class NewsController {
       next(error);
     }
   }
+  async findTitleNew(req, res, next) {
+    try {
+      const { search } = req.query;
+      const newMatched = await NewsModel.find({ title: { $regex: /{search}/ } });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new NewsController();
