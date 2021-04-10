@@ -5,6 +5,7 @@ const authMiddleware = require('../app/middlewares/authMiddleware');
 const router = express.Router();
 
 router.get('/', resultsController.getAllResults);
+router.get('/:slug', resultsController.getResultBySlug);
 router.post('/', authMiddleware, adminMiddleware, resultsController.postResult);
 
 module.exports = router;

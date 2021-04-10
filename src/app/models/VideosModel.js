@@ -17,6 +17,15 @@ const videosSchema = new mongoose.Schema(
       default: 'Others',
       ref: 'Tournament',
     },
+    videoId: {
+      type: String,
+      require: true,
+      trim: true,
+    },
+    author: {
+      type: String,
+      trim: true,
+    },
     linkYoutube: {
       type: String,
       required: true,

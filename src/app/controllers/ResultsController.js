@@ -1,5 +1,6 @@
 const ResultsModel = require('../models/ResultsModel');
 const slugify = require('slugify');
+const shortid = require('shortid');
 class ResultsController {
   //[GET] Get Results
   async getAllResults(req, res, next) {
@@ -7,8 +8,24 @@ class ResultsController {
       const allResults = await ResultsModel.find()
         .populate({ path: 'home', populate: { path: 'clubId' } })
         .populate({ path: 'away', populate: { path: 'clubId' } })
-        .populate({ path: 'video' });
+        .populate({ path: 'video' })
+        .populate({ path: 'tournament' })
+        .sort({ endTime: -1 });
       res.status(200).json({ allResults });
+    } catch (error) {
+      next(error);
+    }
+  }
+  //[GET] Get results by slug
+  async getResultBySlug(req, res, next) {
+    try {
+      const { slug } = req.params;
+      const result = await ResultsModel.findOne({ slug })
+        .populate({ path: 'home', populate: { path: 'clubId' } })
+        .populate({ path: 'away', populate: { path: 'clubId' } })
+        .populate({ path: 'tournament' })
+        .populate({ path: 'video' });
+      res.status(200).json({ result });
     } catch (error) {
       next(error);
     }
@@ -18,10 +35,9 @@ class ResultsController {
     try {
       const newObject = { ...req.body };
 
-      newObject.home.goals = newObject.home.scores.length;
-      newObject.away.goals = newObject.away.scores.length;
-      newObject.slug = slugify(newObject.title, { lower: true, locale: 'vi' });
-
+      newObject.home.goals = newObject.home.scores ? newObject.home.scores.length : 0;
+      newObject.away.goals = newObject.away.scores ? newObject.away.scores.length : 0;
+      newObject.slug = slugify(newObject.title, { lower: true, locale: 'vi' }) + '.' + shortid.generate();
       const newResult = new ResultsModel(newObject);
       await newResult.save();
       res.status(201).json({ newResult, message: 'Thêm kết quả mới thành công' });

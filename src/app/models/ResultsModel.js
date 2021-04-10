@@ -11,6 +11,7 @@ const resultsSchema = mongoose.Schema(
       scores: [
         {
           player: { type: String, trim: true },
+          goalAt: { type: Number, require: true },
           own_goal: { type: Boolean, default: false },
           penalty: { type: Boolean, default: false },
         },
@@ -26,8 +27,9 @@ const resultsSchema = mongoose.Schema(
       scores: [
         {
           player: { type: String, trim: true },
-          goalAt: { type: Date, required: true },
+          goalAt: { type: Number, required: true },
           ownGoal: { type: Boolean, default: false },
+          penalty: { type: Boolean, default: false },
         },
       ],
       goals: { type: Number, default: 0 },
