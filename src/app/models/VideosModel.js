@@ -26,6 +26,7 @@ const videosSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+    channelId: { type: String, trim: true },
     linkYoutube: {
       type: String,
       required: true,

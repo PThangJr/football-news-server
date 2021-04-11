@@ -24,7 +24,7 @@ class TournamentsController {
         error.statusCode = 400;
         throw error;
       } else {
-        const result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/tournament' });
+        const result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/logos' });
         const newTournament = new TournamentsModel({
           name,
           logo: {
@@ -78,7 +78,7 @@ class TournamentsController {
   async updateTournamentById(req, res, next) {
     try {
       const { id } = req.params;
-      const { name } = req.body;
+      const { name, shortname } = req.body;
       const { file } = req;
       const isObjectId = ObjectId.isValid(id);
       if (isObjectId) {
@@ -88,22 +88,33 @@ class TournamentsController {
           error.statusCode = 404;
           throw error;
         } else {
-          const result = await cloudinary.v2.uploader.upload(req.file.path, {
-            folder: 'football-news/logos',
-            overwrite: true,
-            use_filename: false,
-            unique_filename: true,
-          });
-          const update = {
-            logo: {
-              public_id: result.public_id,
-              secure_url: result.secure_url,
-            },
-          };
-          if (name) {
-            update.slug = slugify(name, { lower: true });
-            update.name = name;
+          let result;
+          var update = {};
+          if (file) {
+            if (tournament.logo.public_id) {
+              result = await cloudinary.v2.uploader.upload(req.file.path, {
+                public_id: tournament.logo.public_id,
+                overwrite: true,
+              });
+            } else {
+              result = await cloudinary.v2.uploader.upload(req.file.path, {
+                folder: 'football-news/logos',
+              });
+            }
           }
+          if (result) {
+            update = {
+              logo: {
+                public_id: result.public_id,
+                secure_url: result.secure_url,
+              },
+            };
+          }
+          if (name) {
+            update.name = name;
+            update.slug = slugify(name, { lower: true });
+          }
+
           const tournamentUpdated = await TournamentsModel.findByIdAndUpdate(id, update);
           res.status(201).json({ tournamentUpdated });
         }

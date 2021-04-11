@@ -1,4 +1,5 @@
 const ResultsModel = require('../models/ResultsModel');
+const TournamentsModel = require('../models/TournamentsModel');
 const slugify = require('slugify');
 const shortid = require('shortid');
 class ResultsController {
@@ -12,6 +13,22 @@ class ResultsController {
         .populate({ path: 'tournament' })
         .sort({ endTime: -1 });
       res.status(200).json({ allResults });
+    } catch (error) {
+      next(error);
+    }
+  }
+  //[GET] Get all Results by tournament
+  async getAllResultsByTournament(req, res, next) {
+    try {
+      const { tournamentSlug } = req.params;
+      const tournament = await TournamentsModel.findOne({ slug: tournamentSlug });
+      const tournamentResults = await ResultsModel.find({ tournament: tournament._id })
+        .populate({ path: 'home', populate: { path: 'clubId' } })
+        .populate({ path: 'away', populate: { path: 'clubId' } })
+        .populate({ path: 'video' })
+        .populate({ path: 'tournament' })
+        .sort({ endTime: -1 });
+      res.status(200).json({ tournamentResults });
     } catch (error) {
       next(error);
     }

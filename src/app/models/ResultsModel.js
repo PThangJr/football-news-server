@@ -11,9 +11,15 @@ const resultsSchema = mongoose.Schema(
       scores: [
         {
           player: { type: String, trim: true },
-          goalAt: { type: Number, require: true },
+          goalAt: { type: String, require: true, trim: true },
           own_goal: { type: Boolean, default: false },
           penalty: { type: Boolean, default: false },
+        },
+      ],
+      redCard: [
+        {
+          player: { type: String, trim: true },
+          time: { type: String, trim: true },
         },
       ],
       goals: { type: Number, default: 0 },
@@ -27,9 +33,15 @@ const resultsSchema = mongoose.Schema(
       scores: [
         {
           player: { type: String, trim: true },
-          goalAt: { type: Number, required: true },
+          goalAt: { type: String, required: true },
           ownGoal: { type: Boolean, default: false },
           penalty: { type: Boolean, default: false },
+        },
+      ],
+      redCards: [
+        {
+          player: { type: String, trim: true },
+          time: { type: String, trim: true },
         },
       ],
       goals: { type: Number, default: 0 },
