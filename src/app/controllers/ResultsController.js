@@ -2,6 +2,7 @@ const ResultsModel = require('../models/ResultsModel');
 const TournamentsModel = require('../models/TournamentsModel');
 const slugify = require('slugify');
 const shortid = require('shortid');
+const createError = require('http-errors');
 class ResultsController {
   //[GET] Get Results
   async getAllResults(req, res, next) {
@@ -12,6 +13,10 @@ class ResultsController {
         .populate({ path: 'video' })
         .populate({ path: 'tournament' })
         .sort({ endTime: -1 });
+      if (allResults.length === 0) {
+        const error = createError(404, 'Không có kết quả nào!');
+        throw error;
+      }
       res.status(200).json({ allResults });
     } catch (error) {
       next(error);
@@ -21,14 +26,24 @@ class ResultsController {
   async getAllResultsByTournament(req, res, next) {
     try {
       const { tournamentSlug } = req.params;
+      let { limit, page } = req.query;
+      limit = parseInt(limit);
+      page = parseInt(page);
       const tournament = await TournamentsModel.findOne({ slug: tournamentSlug });
       const tournamentResults = await ResultsModel.find({ tournament: tournament._id })
         .populate({ path: 'home', populate: { path: 'clubId' } })
         .populate({ path: 'away', populate: { path: 'clubId' } })
         .populate({ path: 'video' })
         .populate({ path: 'tournament' })
+        .paginate(req)
         .sort({ endTime: -1 });
-      res.status(200).json({ tournamentResults });
+      const totalItem = await ResultsModel.find({ tournament: tournament._id }).countDocuments();
+      const totalPage = Math.ceil(totalItem / limit);
+      if (!tournament || tournamentResults.length === 0) {
+        const error = createError(404, 'Không tìm thấy kết quả nào');
+        throw error;
+      }
+      res.status(200).json({ tournamentResults, pagination: { limit, page, totalItem, totalPage } });
     } catch (error) {
       next(error);
     }
@@ -37,11 +52,16 @@ class ResultsController {
   async getResultBySlug(req, res, next) {
     try {
       const { slug } = req.params;
+
       const result = await ResultsModel.findOne({ slug })
         .populate({ path: 'home', populate: { path: 'clubId' } })
         .populate({ path: 'away', populate: { path: 'clubId' } })
         .populate({ path: 'tournament' })
         .populate({ path: 'video' });
+      if (!result) {
+        const error = createError(404, 'Không tìm thấy kết quả nào');
+        throw error;
+      }
       res.status(200).json({ result });
     } catch (error) {
       next(error);

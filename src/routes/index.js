@@ -1,4 +1,4 @@
-const apiRouter = require('./newsRouter');
+const newsRouter = require('./newsRouter');
 const authRouter = require('./authRouter');
 const adminRouter = require('./adminRouter');
 const newDetailRouter = require('./newDetailRouter');
@@ -8,7 +8,7 @@ const clubsRouter = require('./clubsRouter');
 const resultsRouter = require('./resultsRouter');
 const videosRouter = require('./videosRouter');
 const route = (app) => {
-  app.use('/api/v1/news', apiRouter);
+  app.use('/api/v1/news', newsRouter);
   app.use('/api/v1/new-detail', newDetailRouter);
   app.use('/api/v1/auth', authRouter);
   app.use('/api/v1/admin', adminRouter);

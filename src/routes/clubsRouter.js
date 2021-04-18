@@ -7,5 +7,6 @@ const upload = require('../multer');
 
 router.get('/', clubsController.getAll);
 router.post('/', authMiddleware, adminMiddleware, upload.single('logo'), clubsController.create);
+router.put('/:clubId', authMiddleware, adminMiddleware, upload.single('logo'), clubsController.updateClub);
 
 module.exports = router;

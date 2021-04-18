@@ -10,6 +10,7 @@ const TournamentSchema = new mongoose.Schema(
       public_id: { type: String, trim: true, unique: true },
       secure_url: { type: String, trim: true, unique: true },
     },
+    top: { type: Number, default: 100 },
   },
   { timestamps: true }
 );

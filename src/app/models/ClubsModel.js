@@ -9,6 +9,10 @@ const clubSchema = new mongoose.Schema(
     },
     shortname: {
       type: String,
+      trim: true,
+    },
+    codename: {
+      type: String,
       required: true,
       trim: true,
     },

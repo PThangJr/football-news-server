@@ -14,22 +14,21 @@ class ClubsController {
   async create(req, res, next) {
     try {
       const newObject = { ...req.body };
-      const { name, shortname, tournaments } = req.body;
+      const { name, shortname, tournaments, codename } = req.body;
       const club = await ClubsModel.findOne({ name });
       if (club) {
         throw createError(400, 'Tên đội bóng đã tồn tại. Vui lòng nhập lại');
       } else {
-        if (req.file && name && shortname && tournaments) {
+        if (req.file && name && codename && tournaments) {
           var result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/clubs' });
         }
         const newClub = new ClubsModel({
-          name,
+          ...newObject,
           logo: {
             public_id: result.public_id,
             secure_url: result.secure_url,
           },
           slug: slugify(name, { lower: true }),
-          shortname,
         });
         newClub.tournaments.push(tournaments);
         await newClub.save();
@@ -39,20 +38,29 @@ class ClubsController {
       next(error);
     }
   }
-  //   async pushTour(req, res, next) {
-  //     try {
-  //       const update = await ClubsModel.updateMany(
-  //         {},
-  //         {
-  //           $push: {
-  //             tournament: '605ff4a01b3b2313b8418b07',
-  //           },
-  //         }
-  //       );
-  //       res.json({ update });
-  //     } catch (error) {
-  //       next(error);
-  //     }
-  //   }
+  async updateClub(req, res, next) {
+    try {
+      const { clubId } = req.params;
+      const update = { ...req.body };
+      const club = await ClubsModel.findById(clubId);
+      update.tournaments = [update.tournaments];
+      if (!update.shortname) {
+        update.shortname = req.body.name;
+      }
+      var result;
+      var clubUpdated;
+      if (req.file) {
+        result = await cloudinary.v2.uploader.upload(req.file.path, {
+          public_id: club.logo.public_id,
+          overwrite: true,
+        });
+      }
+
+      clubUpdated = await ClubsModel.findByIdAndUpdate(clubId, update);
+      res.status(200).json({ clubUpdated, message: 'Cập nhật câu lạc bộ thành công!' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 module.exports = new ClubsController();

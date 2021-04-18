@@ -7,7 +7,8 @@ class AdminController {
   async login(req, res, next) {
     try {
       const { username, password } = req.body;
-      const user = await AuthModel.findOne({ username, role: 0 }).exec();
+      const user = await AuthModel.findOne({ username, role: 'admin' });
+
       if (!user) {
         const error = {
           message: {

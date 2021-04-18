@@ -14,7 +14,6 @@ const videosSchema = new mongoose.Schema(
     },
     tournament: {
       type: mongoose.Schema.Types.ObjectId,
-      default: 'Others',
       ref: 'Tournament',
     },
     videoId: {
@@ -46,4 +45,15 @@ const videosSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+videosSchema.query.paginate = function (req) {
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page) || 1;
+  if (page) {
+    const skip = limit * (page - 1);
+    return this.limit(limit).skip(skip);
+  } else {
+    return this;
+  }
+};
 module.exports = mongoose.model('Video', videosSchema);

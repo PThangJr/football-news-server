@@ -17,13 +17,13 @@ class DetailNewController {
           path: 'tournament',
           select: 'name slug _id',
         });
-      const newUpdated = await NewsModel.updateOne(
-        { slug },
-        {
-          views: newBySlug.views + 1,
-        }
-      );
       if (newBySlug) {
+        let newUpdated = await NewsModel.updateOne(
+          { slug },
+          {
+            views: newBySlug.views + 1,
+          }
+        );
         res.status(200).send({ data: newBySlug });
       } else {
         const error = new Error('Bài viết không tồn tại');
@@ -39,27 +39,18 @@ class DetailNewController {
       const { user } = req;
       const { slug } = req.params;
       if (user) {
-        const userId = user.id;
-        const newBySlug = await NewsModel.findOne({ slug });
-        let { likes } = newBySlug;
-        const indexNew = likes.indexOf(userId);
-        if (indexNew !== -1) {
-          // likes = likes.filter((item) => item !== userId);
-          likes.splice(indexNew, 1);
-        } else {
-          likes.push(userId);
-        }
-        await newBySlug.save();
-        const isLiked = likes.include(req.user.id);
-        // const indexUser = userLiked.like_news.indexOf(newBySlug._id);
-        // if (indexUser !== -1) {
-        //   userLiked.like_news.splice(indexUser, 1);
-        // } else {
-        //   userLiked.like_news.push(newBySlug._id);
-        // }
+        let newUpdated;
+        const userId = user._id;
+        const newBySlug = await NewsModel.findOne({ slug, likes: userId });
 
+        // newUpdated = await NewsModel.updateOne({ slug }, { $addToSet: { likes: { $each: [userId] } } });
+        if (!newBySlug) {
+          newUpdated = await NewsModel.updateOne({ slug }, { $addToSet: { likes: [userId] } });
+        } else {
+          newUpdated = await NewsModel.updateOne({ slug }, { $pull: { likes: userId } });
+        }
         // await userLiked.save();
-        res.status(200).json({ liked: isLiked });
+        res.status(200).json({ newUpdated, message: 'Like Successfully', userId });
       }
     } catch (error) {
       next(error);

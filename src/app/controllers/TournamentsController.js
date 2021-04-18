@@ -7,7 +7,7 @@ class TournamentsController {
   constructor() {}
   //   [GET] All Tournaments
   async getAllTournaments(req, res, next) {
-    const tournaments = await TournamentsModel.find({}).sortable(req);
+    const tournaments = await TournamentsModel.find({}).sort({ top: 1 }).sortable(req);
     if (!tournaments) {
       res.status(200).json({ message: 'Không có giải đấu nào' });
     } else {
@@ -17,8 +17,8 @@ class TournamentsController {
   //[POST] create a new tournament
   async createTournament(req, res, next) {
     try {
-      const { name } = req.body;
-      const tournament = await TournamentsModel.findOne({ name });
+      const newObj = { ...req.body };
+      const tournament = await TournamentsModel.findOne({ name: newObj.name });
       if (tournament) {
         const error = new Error('Giải đấu đã tồn tại. Vui lòng thử lại');
         error.statusCode = 400;
@@ -26,7 +26,7 @@ class TournamentsController {
       } else {
         const result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/logos' });
         const newTournament = new TournamentsModel({
-          name,
+          ...newObj,
           logo: {
             public_id: result.public_id,
             secure_url: result.secure_url,

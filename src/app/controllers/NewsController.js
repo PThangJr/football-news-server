@@ -33,18 +33,25 @@ class NewsController {
   //[GET] all news
   async index(req, res, next) {
     try {
-      let { limit, page } = req.query;
+      let { limit, page, search } = req.query;
+      // console.log('Searching..', search);
       limit = parseInt(limit);
       page = parseInt(page);
-      const allFootballNews = await NewsModel.find()
+      let regex;
+      const query = {};
+      if (search) {
+        regex = new RegExp(req.query.search, 'iu');
+        query.title = regex;
+      }
+      const allFootballNews = await NewsModel.find(query)
         .paginate(req)
         .populate({
-          path: 'tournament',
+          path: 'tournaments',
           select: 'name slug _id',
         })
         .sort({ createdAt: -1, updatedAt: -1 })
         .sortable(req);
-      const totalItem = await NewsModel.find({}).countDocuments();
+      const totalItem = await NewsModel.find(query).countDocuments();
       const totalPage = Math.ceil(totalItem / limit);
 
       if (allFootballNews.length > 0) {
@@ -53,7 +60,7 @@ class NewsController {
           pagination: { page, limit, totalItem, totalPage },
         });
       } else {
-        throw createError(404, 'Không có dữ liệu');
+        throw createError(404, 'Không có bài viết nào');
       }
     } catch (error) {
       next(error);
@@ -63,25 +70,20 @@ class NewsController {
   //[POST] create new
   async createNew(req, res, next) {
     try {
-      const { title, description, content, topic, views, likes, tournament } = req.body;
-      if (title && description && content && topic && tournament) {
+      const newObj = { ...req.body };
+      const { title, description, content, topic, tournaments } = req.body;
+      if (req.file && title && description && content && topic && tournaments) {
         var result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/thumbnail' });
       }
       // console.log(result);
+      newObj.thumbnail = {};
+      newObj.thumbnail.public_id = result.public_id;
+      newObj.thumbnail.secure_url = result.secure_url;
+      newObj.author = req.user._id;
+      newObj.slug = slugify(title, { lower: true, locale: 'vi' }) + '.' + shortid.generate();
+      newObj.tournaments = [tournaments];
       const createNew = new NewsModel({
-        title,
-        description,
-        thumbnail: {
-          public_id: result ? result.public_id : '',
-          secure_url: result ? result.secure_url : '',
-        },
-        content,
-        topic,
-        views,
-        likes,
-        tournament,
-        author: req.user.id,
-        slug: slugify(title, { lower: true, locale: 'vi' }) + '.' + shortid.generate(),
+        ...newObj,
       });
       const newPost = await createNew.save();
       if (!newPost) {
@@ -115,11 +117,11 @@ class NewsController {
       const tour = await TournamentsModel.findOne({ slug: tournament });
       // const newByTournament = await NewsModel.find({ tournament: { $in: tour._id } }).paginate(req);
       if (tour) {
-        const newByTournament = await NewsModel.find({ tournament: tour._id })
-          .populate({ path: 'tournament', select: 'name slug _id' })
+        const newByTournament = await NewsModel.find({ tournaments: tour._id })
+          .populate({ path: 'tournaments', select: 'name slug _id' })
           .paginate(req)
           .sort({ createdAt: -1, updatedAt: -1 });
-        const totalItem = await NewsModel.find({ tournament: tour._id }).countDocuments();
+        const totalItem = await NewsModel.find({ tournaments: tour._id }).countDocuments();
         let totalPage;
         // Tính tổng số trang
         if (limit) {
@@ -131,10 +133,10 @@ class NewsController {
             pagination: { page, limit, totalItem, totalPage },
           });
         } else {
-          throw createError(404, 'Không có dữ liệu');
+          throw createError(404, 'Không có bài viết nào');
         }
       } else {
-        throw createError(404, 'Không có dữ liệu');
+        throw createError(404, 'Không có bài viết nào');
       }
       // res.json({ result: req.params.tournament });
     } catch (error) {
@@ -204,10 +206,18 @@ class NewsController {
       next(error);
     }
   }
-  async findTitleNew(req, res, next) {
+  async searchNews(req, res, next) {
     try {
-      const { search } = req.query;
-      const newMatched = await NewsModel.find({ title: { $regex: /{search}/ } });
+      let { limit, page } = req.query;
+      console.log(req.body, req.query);
+      limit = parseInt(limit);
+      page = parseInt(page);
+      const regex = new RegExp(req.query.search, 'iu');
+      const newsFound = await NewsModel.find({ title: regex }).paginate(req);
+      const totalItem = await NewsModel.find({ title: regex }).countDocuments();
+      const totalPage = Math.ceil(totalItem / limit);
+
+      res.status(200).json({ newsFound, pagination: { page, limit, totalItem, totalPage } });
     } catch (error) {
       next(error);
     }

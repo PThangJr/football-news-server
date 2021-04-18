@@ -17,10 +17,12 @@ const NewsSchema = new Schema(
         ref: 'Auth',
       },
     ],
-    tournament: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tournament',
-    },
+    tournaments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tournament',
+      },
+    ],
     slug: { type: String, slug: 'title', unique: true },
     author: { type: mongoose.Schema.Types.ObjectId },
     trending: { type: Number, default: -1 },

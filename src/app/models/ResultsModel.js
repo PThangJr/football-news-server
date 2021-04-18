@@ -16,7 +16,7 @@ const resultsSchema = mongoose.Schema(
           penalty: { type: Boolean, default: false },
         },
       ],
-      redCard: [
+      redCards: [
         {
           player: { type: String, trim: true },
           time: { type: String, trim: true },
@@ -63,5 +63,15 @@ const resultsSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
-
+resultsSchema.query.paginate = function (req) {
+  let { limit, page } = req.query;
+  limit = parseInt(limit);
+  page = parseInt(page) || 1;
+  if (page) {
+    const skip = limit * (page - 1);
+    return this.limit(limit).skip(skip);
+  } else {
+    return this;
+  }
+};
 module.exports = mongoose.model('Result', resultsSchema);

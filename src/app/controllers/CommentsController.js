@@ -43,15 +43,8 @@ class CommentsController {
         content,
       });
       await newComment.save();
-      const newUpdated = await NewsModel.updateOne(
-        { _id: newId },
-        {
-          $push: {
-            comments: newComment._id,
-          },
-        }
-      );
-      res.status(201).json({ newUpdated });
+
+      res.status(201).json({ newComment });
     } catch (error) {
       next(error);
     }
@@ -70,14 +63,7 @@ class CommentsController {
         content,
       });
       await newComment.save();
-      const newUpdated = await NewsModel.updateOne(
-        { _id: newBySlug._id },
-        {
-          $push: {
-            comments: newComment._id,
-          },
-        }
-      );
+
       const comment = await CommentsModel.findOne({ _id: newComment._id }).populate({
         path: 'userId',
         select: 'username avatar _id',
