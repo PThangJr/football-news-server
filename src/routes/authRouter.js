@@ -9,6 +9,7 @@ const router = express.Router();
 
 router.post('/register', checkUniqueAuthMiddleware, upload.single('avatar'), authController.register);
 router.post('/login', authController.login);
+router.post('/admin/login', authController.admin);
 router.get('/logout', authController.logout);
 router.get('/refresh_token', authController.refreshToken);
 router.get('/information', authMiddleware, authController.getInfoUser);

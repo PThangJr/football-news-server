@@ -71,17 +71,17 @@ class NewsController {
   async createNew(req, res, next) {
     try {
       const newObj = { ...req.body };
-      const { title, description, content, topic, tournaments } = req.body;
+      let { title, description, content, topic, tournaments } = req.body;
       if (req.file && title && description && content && topic && tournaments) {
         var result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/thumbnail' });
       }
-      // console.log(result);
+      tournaments = JSON.parse(tournaments);
       newObj.thumbnail = {};
       newObj.thumbnail.public_id = result.public_id;
       newObj.thumbnail.secure_url = result.secure_url;
       newObj.author = req.user._id;
       newObj.slug = slugify(title, { lower: true, locale: 'vi' }) + '.' + shortid.generate();
-      newObj.tournaments = [tournaments];
+      newObj.tournaments = Array.isArray(tournaments) ? [...tournaments] : [tournaments];
       const createNew = new NewsModel({
         ...newObj,
       });
@@ -98,11 +98,21 @@ class NewsController {
   async deleteNewById(req, res) {
     const { newId } = req.params;
     try {
-      const newDeleted = await NewsModel.deleteOne({ _id: newId });
-      if (!newDeleted) {
-        throw createError(404, 'Bài viết không tồn tại');
+      let thumbnailDeleted;
+      const newItem = await NewsModel.findOne({ _id: newId });
+      if (newItem.thumbnail.hasOwnProperty('public_id')) {
+        thumbnailDeleted = await cloudinary.v2.uploader.destroy(newItem.thumbnail.public_id);
       }
-      res.status(200).json({ newDeleted, message: 'Xóa bài viết thành công' });
+      if (thumbnailDeleted) {
+        const newDeleted = await NewsModel.deleteOne({ _id: newId });
+        if (!newDeleted) {
+          throw createError(404, 'Bài viết không tồn tại');
+        }
+        res.status(200).json({ newDeleted, message: 'Xóa bài viết thành công' });
+      } else {
+        const error = createError(400, 'Lỗi. Xóa bài viết không thành công!');
+        throw error;
+      }
     } catch (error) {
       next(error);
     }

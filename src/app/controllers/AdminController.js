@@ -35,6 +35,14 @@ class AdminController {
       next(error);
     }
   }
+  // [GET] get information Admin
+  async infoAdmin(req, res, next) {
+    try {
+      const admin = await AuthModel.findOne();
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 const createAccessToken = (user) => {

@@ -162,16 +162,16 @@ class AuthController {
   async admin(req, res) {
     try {
       const { username, password } = req.body;
-      const user = await AuthModel.findOne({ username, role: 0 });
+      const user = await AuthModel.findOne({ username, role: 'admin' });
       if (!user) return res.status(400).json({ message: 'Tài khoản không tồn tại. Vui lòng nhập lại' });
       const isPassword = await bcrypt.compare(password, user.password);
       if (!isPassword) return res.status(400).json({ message: 'Mật khẩu không đúng. Vui lòng nhập lại' });
 
       //Send Token
-      const access_token = createAccessToken({ id: user._id });
-      res.status(200).json({ access_token });
+      const access_token = createAccessToken({ _id: user._id, username });
+      res.status(200).json({ access_token, username });
     } catch (error) {
-      res.status(500).json({ message: error.message });
+      next(error);
     }
   }
   //[PUT] change password
