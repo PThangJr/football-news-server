@@ -14,7 +14,9 @@ class ClubsController {
   async create(req, res, next) {
     try {
       const newObject = { ...req.body };
-      const { name, shortname, tournaments, codename } = req.body;
+      let { name, tournaments, codename, shortname } = req.body;
+      tournaments = JSON.parse(tournaments);
+      codename = codename.toUpperCase();
       const club = await ClubsModel.findOne({ name });
       if (club) {
         throw createError(400, 'Tên đội bóng đã tồn tại. Vui lòng nhập lại');
@@ -28,11 +30,16 @@ class ClubsController {
             public_id: result.public_id,
             secure_url: result.secure_url,
           },
+          codename,
+          shortname: shortname ? shortname : name,
           slug: slugify(name, { lower: true }),
+          tournaments,
         });
-        newClub.tournaments.push(tournaments);
+        if (!Array.isArray(tournaments)) {
+          newClub.tournaments.push(tournaments);
+        }
         await newClub.save();
-        res.status(201).json({ newClub });
+        res.status(201).json({ newClub, message: 'Thêm mới đội bóng thành công!' });
       }
     } catch (error) {
       next(error);
@@ -58,6 +65,15 @@ class ClubsController {
 
       clubUpdated = await ClubsModel.findByIdAndUpdate(clubId, update);
       res.status(200).json({ clubUpdated, message: 'Cập nhật câu lạc bộ thành công!' });
+    } catch (error) {
+      next(error);
+    }
+  }
+  async getClubsByTournamentId(req, res, next) {
+    try {
+      const { tournamentId } = req.params;
+      const clubs = await ClubsModel.find({ tournaments: tournamentId });
+      res.status(200).json({ clubs });
     } catch (error) {
       next(error);
     }

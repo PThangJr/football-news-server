@@ -14,6 +14,9 @@ class DetailNewController {
           populate: { path: 'userId', select: '-password' },
         })
         .populate({
+          path: 'video',
+        })
+        .populate({
           path: 'tournament',
           select: 'name slug _id',
         });

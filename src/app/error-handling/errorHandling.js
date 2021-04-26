@@ -13,6 +13,7 @@ const errorHandling = (err, req, res, next) => {
     error: {
       status: 'Fail',
       message: err.message || err,
+      code: err.statusCode,
     },
   });
 };

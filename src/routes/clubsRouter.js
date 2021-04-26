@@ -6,6 +6,7 @@ const router = express.Router();
 const upload = require('../multer');
 
 router.get('/', clubsController.getAll);
+router.get('/:tournamentId', clubsController.getClubsByTournamentId);
 router.post('/', authMiddleware, adminMiddleware, upload.single('logo'), clubsController.create);
 router.put('/:clubId', authMiddleware, adminMiddleware, upload.single('logo'), clubsController.updateClub);
 

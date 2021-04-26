@@ -12,18 +12,21 @@ const videosSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Result',
     },
-    tournament: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tournament',
-    },
+    tournaments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tournament',
+      },
+    ],
     videoId: {
       type: String,
-      require: true,
+      required: true,
       trim: true,
     },
     author: {
       type: String,
       trim: true,
+      default: 'Link original',
     },
     channelId: { type: String, trim: true },
     linkYoutube: {

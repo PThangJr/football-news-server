@@ -26,6 +26,7 @@ const NewsSchema = new Schema(
     slug: { type: String, slug: 'title', unique: true },
     author: { type: mongoose.Schema.Types.ObjectId },
     trending: { type: Number, default: -1 },
+    video: { type: mongoose.Schema.Types.ObjectId, ref: 'Video' },
     source: { type: String, trim: true, default: 'Copy' },
     originalLink: { type: String, trim: true },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],

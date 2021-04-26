@@ -49,6 +49,9 @@ class NewsController {
           path: 'tournaments',
           select: 'name slug _id',
         })
+        .populate({
+          path: 'video',
+        })
         .sort({ createdAt: -1, updatedAt: -1 })
         .sortable(req);
       const totalItem = await NewsModel.find(query).countDocuments();
@@ -129,6 +132,7 @@ class NewsController {
       if (tour) {
         const newByTournament = await NewsModel.find({ tournaments: tour._id })
           .populate({ path: 'tournaments', select: 'name slug _id' })
+          .populate({ path: 'video' })
           .paginate(req)
           .sort({ createdAt: -1, updatedAt: -1 });
         const totalItem = await NewsModel.find({ tournaments: tour._id }).countDocuments();
