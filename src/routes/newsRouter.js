@@ -7,7 +7,7 @@ const router = express.Router();
 const upload = require('../multer');
 const searchMiddleware = require('../app/middlewares/searchMiddleware');
 
-router.get('/', NewsController.index);
+router.get('/', NewsController.getNews);
 router.get('/search', NewsController.searchNews);
 router.get('/comments/:slug', NewsController.getComments);
 router.get('/:tournament', NewsController.getNewsByTournament);

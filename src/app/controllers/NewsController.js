@@ -31,7 +31,7 @@ class NewsController {
   constructor() {}
 
   //[GET] all news
-  async index(req, res, next) {
+  async getNews(req, res, next) {
     try {
       let { limit, page, search } = req.query;
       // console.log('Searching..', search);
