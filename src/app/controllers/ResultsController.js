@@ -7,17 +7,23 @@ class ResultsController {
   //[GET] Get Results
   async getAllResults(req, res, next) {
     try {
+      let { limit, page } = req.query;
+      limit = parseInt(limit);
+      page = parseInt(page);
       const allResults = await ResultsModel.find()
         .populate({ path: 'home', populate: { path: 'clubId' } })
         .populate({ path: 'away', populate: { path: 'clubId' } })
         .populate({ path: 'video' })
         .populate({ path: 'tournament' })
-        .sort({ endTime: -1 });
+        .paginate(req)
+        .sort({ endTime: -1, createdAt: -1 });
       if (allResults.length === 0) {
         const error = createError(404, 'Không có kết quả nào!');
         throw error;
       }
-      res.status(200).json({ allResults });
+      const totalItem = await ResultsModel.find().countDocuments();
+      const totalPage = Math.ceil(totalItem / limit);
+      res.status(200).json({ allResults, pagination: { totalItem, totalPage, limit, page } });
     } catch (error) {
       next(error);
     }
@@ -36,7 +42,7 @@ class ResultsController {
         .populate({ path: 'video' })
         .populate({ path: 'tournament' })
         .paginate(req)
-        .sort({ endTime: -1 });
+        .sort({ endTime: -1, createdAt: -1 });
       const totalItem = await ResultsModel.find({ tournament: tournament._id }).countDocuments();
       const totalPage = Math.ceil(totalItem / limit);
       if (!tournament || tournamentResults.length === 0) {
@@ -71,6 +77,7 @@ class ResultsController {
   async postResult(req, res, next) {
     try {
       const newObject = { ...req.body };
+      const { endTime } = req.body;
 
       newObject.home.goals = newObject.home.scores ? newObject.home.scores.length : 0;
       newObject.away.goals = newObject.away.scores ? newObject.away.scores.length : 0;

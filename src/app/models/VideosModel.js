@@ -6,7 +6,6 @@ const videosSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
     result: {
       type: mongoose.Schema.Types.ObjectId,

@@ -54,6 +54,7 @@ const resultsSchema = mongoose.Schema(
     endTime: {
       type: Date,
       require: true,
+      default: Date.now,
     },
     slug: {
       type: String,

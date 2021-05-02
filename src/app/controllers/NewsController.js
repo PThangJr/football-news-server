@@ -74,7 +74,7 @@ class NewsController {
   async createNew(req, res, next) {
     try {
       const newObj = { ...req.body };
-      let { title, description, content, topic, tournaments } = req.body;
+      let { title, description, content, topic, tournaments, video } = req.body;
       if (req.file && title && description && content && topic && tournaments) {
         var result = await cloudinary.v2.uploader.upload(req.file.path, { folder: 'football-news/thumbnail' });
       }
@@ -85,6 +85,9 @@ class NewsController {
       newObj.author = req.user._id;
       newObj.slug = slugify(title, { lower: true, locale: 'vi' }) + '.' + shortid.generate();
       newObj.tournaments = Array.isArray(tournaments) ? [...tournaments] : [tournaments];
+      if (!video) {
+        newObj.video = null;
+      }
       const createNew = new NewsModel({
         ...newObj,
       });

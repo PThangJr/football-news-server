@@ -55,17 +55,21 @@ class VideosController {
   }
   async postVideo(req, res, next) {
     try {
-      const { title, result, tournaments, videoId, author } = req.body;
+      const { title, result, tournaments, videoId, author, createdAt, channelId } = req.body;
       const newVideo = new VideosModel({
         title,
-        result,
         tournaments: JSON.parse(tournaments),
+        result,
         videoId,
+        channelId,
         author,
         linkYoutube: `https://www.youtube.com/watch?v=${videoId}`,
         linkThumbnail: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
         slug: slugify(title, { lower: true, locale: 'vi' }) + '.' + shortid.generate(),
       });
+      if (createdAt) {
+        newVideo.createdAt = createdAt;
+      }
       await newVideo.save();
       res.status(201).json({ newVideo, message: 'Thêm mới video thành công' });
     } catch (error) {
